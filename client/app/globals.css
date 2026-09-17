@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-ink-900 antialiased;
+}
+
+::selection {
+  @apply bg-brand-200 text-brand-900;
+}
+
+.container-page {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.section {
+  @apply bg-slate-50;
+}
+
+.section-heading {
+  @apply text-3xl sm:text-4xl font-bold tracking-tight text-ink-900;
+}
+
+.section-subheading {
+  @apply mt-3 max-w-2xl text-ink-500;
+}
+
+.card {
+  @apply rounded-2xl border border-slate-200 bg-white shadow-card;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-white;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-ink-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 focus:ring-offset-white;
+}
+
+.tag-pill {
+  @apply inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200;
+}
+
+.skeleton {
+  @apply animate-pulse bg-slate-200;
+}

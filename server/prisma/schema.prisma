@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ExamStatus {
+  PASS
+  FAIL
+  PENDING
+}
+
+model User {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  password  String
+  role      String   @default("student")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model ExamResult {
+  id             String     @id @default(cuid())
+  registrationId String     @unique
+  studentName    String
+  score          Int
+  total          Int
+  status         ExamStatus @default(PENDING)
+  examYear       Int        @default(2026)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@map("exam_results")
+}
+
+model NewsArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String
+  category    String
+  imageUrl    String
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news_articles")
+}
+
+model ProgramAchievement {
+  id          String   @id @default(cuid())
+  programSlug String
+  category    String // "stem-center" | "hobbies"
+  title       String
+  description String
+  year        Int
+  metricLabel String?
+  metricValue String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([programSlug])
+  @@map("program_achievements")
+}
