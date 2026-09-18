@@ -11,13 +11,47 @@ import adminRoutes from "./routes/admin.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN =
-  process.env.CLIENT_ORIGIN ||
-  (process.env.NODE_ENV === "production"
-    ? "https://alene-highschool-website.vercel.app"
-    : "http://localhost:3000");
 
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
+// Base allowed origins
+const allowedOrigins = [
+  "https://alene-highschool-website.vercel.app",
+  "http://localhost:3000",
+];
+
+// If process.env.CLIENT_ORIGIN is set in Render, clean and include it
+if (process.env.CLIENT_ORIGIN) {
+  const cleanEnvOrigin = process.env.CLIENT_ORIGIN.replace(/\/$/, "");
+  if (!allowedOrigins.includes(cleanEnvOrigin)) {
+    allowedOrigins.push(cleanEnvOrigin);
+  }
+}
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests (Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Strip trailing slashes from incoming request origin header
+      const normalizedOrigin = origin.replace(/\/$/, "");
+
+      // Match against allowlist OR any Vercel preview URL (*.vercel.app)
+      const isAllowed =
+        allowedOrigins.includes(normalizedOrigin) ||
+        /\.vercel\.app$/.test(normalizedOrigin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Blocked by CORS policy for origin: ${origin}`));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -36,5 +70,5 @@ app.use((_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Alene HS API server running on http://localhost:${PORT}`);
+  console.log(`Alene HS API server running on port ${PORT}`);
 });
