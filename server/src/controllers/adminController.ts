@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { prisma } from "../lib/prisma";
-import type { AuthenticatedRequest } from "../middleware/auth";
+import { prisma } from "../lib/prisma.js";
+import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 export async function getDashboardStats(_req: AuthenticatedRequest, res: Response) {
   try {

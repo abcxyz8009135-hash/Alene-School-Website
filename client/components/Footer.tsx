@@ -54,7 +54,7 @@ export default function Footer() {
           <ul className="mt-4 space-y-2.5 text-sm text-ink-500">
             <li>Web Development</li>
             <li>Robotics &amp; Automation</li>
-            <li>Biotechnology &amp; Applied Sciences</li>
+            <li>Science Lab</li>
             <li>Arts &amp; Music</li>
             <li>Sports &amp; Athletics</li>
             <li>Leadership &amp; Student Council</li>

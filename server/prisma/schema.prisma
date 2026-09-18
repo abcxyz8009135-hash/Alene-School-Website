@@ -3,14 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum ExamStatus {
-  PASS
-  FAIL
-  PENDING
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -57,7 +52,7 @@ model NewsArticle {
 model ProgramAchievement {
   id          String   @id @default(cuid())
   programSlug String
-  category    String // "stem-center" | "hobbies"
+  category    String
   title       String
   description String
   year        Int
@@ -68,4 +63,10 @@ model ProgramAchievement {
 
   @@index([programSlug])
   @@map("program_achievements")
+}
+
+enum ExamStatus {
+  PASS
+  FAIL
+  PENDING
 }

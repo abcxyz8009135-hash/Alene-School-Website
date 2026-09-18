@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
+import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
@@ -81,6 +82,22 @@ export async function login(req: Request, res: Response) {
     });
   } catch (error) {
     console.error("Error logging in user:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+}
+
+export async function me(req: AuthenticatedRequest, res: Response) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user?.id } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.status(200).json({
+      user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 }

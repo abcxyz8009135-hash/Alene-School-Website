@@ -2,7 +2,7 @@ export const SCHOOL_NAME = "Alene High School";
 export const SCHOOL_SHORT_NAME = "Alene HS";
 export const SCHOOL_MOTTO = "Knowledge. Character. Innovation.";
 
-export const LOGO_PATH = "/logo.png";
+export const LOGO_PATH = "/logo.jpg";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";

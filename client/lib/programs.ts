@@ -39,13 +39,13 @@ export const PROGRAMS: Program[] = [
     establishedYear: 2019,
   },
   {
-    slug: "biotechnology-applied-sciences",
+    slug: "science-lab",
     category: "stem-center",
-    title: "Biotechnology & Applied Sciences",
+    title: "Science Lab",
     summary:
       "Laboratory experiments, genetics fundamentals, and environmental research.",
     description:
-      "This program gives students hands-on laboratory experience across genetics, microbiology, and environmental science. Students design and run original research projects, many of which are presented at regional science fairs and community environmental initiatives.",
+      "The Science Lab gives students hands-on laboratory experience across physics, chemistry, biology, genetics, and environmental science. Students design and run original research projects, many of which are presented at regional science fairs and community environmental initiatives.",
     imageSrc:
       "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1000&q=80",
     curriculumHighlights: [
@@ -169,7 +169,7 @@ export const MOCK_ACHIEVEMENTS: ProgramAchievement[] = [
   },
   {
     id: "ba-1",
-    programSlug: "biotechnology-applied-sciences",
+    programSlug: "science-lab",
     category: "stem-center",
     title: "Regional Science Fair — Best Research Award",
     description:
@@ -180,7 +180,7 @@ export const MOCK_ACHIEVEMENTS: ProgramAchievement[] = [
   },
   {
     id: "ba-2",
-    programSlug: "biotechnology-applied-sciences",
+    programSlug: "science-lab",
     category: "stem-center",
     title: "Community Environmental Impact Study",
     description:

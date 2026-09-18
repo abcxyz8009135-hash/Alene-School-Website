@@ -116,9 +116,9 @@ export default async function HomePage() {
               <div className="card flex items-start gap-3 p-5">
                 <FlaskConical className="h-5 w-5 shrink-0 text-brand-600" />
                 <div>
-                  <h4 className="font-semibold text-ink-900">Applied Sciences</h4>
+                  <h4 className="font-semibold text-ink-900">Science Lab</h4>
                   <p className="mt-1 text-sm text-ink-500">
-                    Fully equipped biotechnology &amp; research labs.
+                    Fully equipped physics, chemistry &amp; biology labs.
                   </p>
                 </div>
               </div>

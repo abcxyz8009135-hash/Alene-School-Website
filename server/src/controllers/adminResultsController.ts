@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { z } from "zod";
-import { prisma } from "../lib/prisma";
-import type { AuthenticatedRequest } from "../middleware/auth";
+import { prisma } from "../lib/prisma.js";
+import type { AuthenticatedRequest } from "../middleware/auth.js";
 
 const resultSchema = z.object({
   registrationId: z.string().min(3, "Registration ID is required."),

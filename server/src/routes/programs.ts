@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getProgramAchievements } from "../controllers/programsController";
+import { getProgramAchievements } from "../controllers/programsController.js";
 
 const router = Router();
 

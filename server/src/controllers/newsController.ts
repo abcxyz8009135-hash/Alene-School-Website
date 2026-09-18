@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function getNews(req: Request, res: Response) {
   const { category, search } = req.query as { category?: string; search?: string };

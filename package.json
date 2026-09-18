@@ -1,0 +1,22 @@
+{
+  "name": "alene-high-school-root",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "description": "Full-stack web application for Alene High School, with 7 pages: Home, About Us, STEM Center, Hobbies, News,\r Contact Us, and Entrance Exam Result.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-abcxyz:abcxyz8009135-hash/Alene-School-Website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

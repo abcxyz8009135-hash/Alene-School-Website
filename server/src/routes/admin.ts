@@ -1,24 +1,24 @@
 import { Router } from "express";
-import { requireAdmin, requireAuth } from "../middleware/auth";
-import { getDashboardStats } from "../controllers/adminController";
+import { requireAdmin, requireAuth } from "../middleware/auth.js";
+import { getDashboardStats } from "../controllers/adminController.js";
 import {
   createNews,
   deleteNews,
   listNewsAdmin,
   updateNews,
-} from "../controllers/adminNewsController";
+} from "../controllers/adminNewsController.js";
 import {
   createResult,
   deleteResult,
   listResultsAdmin,
   updateResult,
-} from "../controllers/adminResultsController";
+} from "../controllers/adminResultsController.js";
 import {
   createAchievement,
   deleteAchievement,
   listAchievementsAdmin,
   updateAchievement,
-} from "../controllers/adminProgramsController";
+} from "../controllers/adminProgramsController.js";
 
 const router = Router();
 

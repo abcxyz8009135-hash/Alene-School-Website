@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getResultByRegistrationId } from "../controllers/resultsController";
+import { getResultByRegistrationId } from "../controllers/resultsController.js";
 
 const router = Router();
 

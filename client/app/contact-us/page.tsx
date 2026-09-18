@@ -58,7 +58,7 @@ export default function ContactUsPage() {
 
           {/* Map placeholder */}
           <div className="card relative flex h-56 items-center justify-center overflow-hidden bg-slate-50">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.08),transparent_70%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.08),transparent_70%)]" />
             <div className="relative flex flex-col items-center gap-2 text-center">
               <MapPin className="h-8 w-8 text-brand-500" />
               <p className="text-sm text-ink-500">Map preview unavailable</p>

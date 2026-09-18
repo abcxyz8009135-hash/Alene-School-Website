@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient, ExamStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -135,7 +136,7 @@ async function main() {
         year: 2024,
       },
       {
-        programSlug: "biotechnology-applied-sciences",
+        programSlug: "science-lab",
         category: "stem-center",
         title: "Regional Science Fair — Best Research Award",
         description:
@@ -145,7 +146,7 @@ async function main() {
         metricValue: "120+",
       },
       {
-        programSlug: "biotechnology-applied-sciences",
+        programSlug: "science-lab",
         category: "stem-center",
         title: "Community Environmental Impact Study",
         description: "Students partnered with the local municipality on a soil contamination survey.",

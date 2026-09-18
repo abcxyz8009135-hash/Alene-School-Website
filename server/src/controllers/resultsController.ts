@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function getResultByRegistrationId(req: Request, res: Response) {
   const { registrationId } = req.params;

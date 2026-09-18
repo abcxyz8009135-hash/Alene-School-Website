@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 export async function getProgramAchievements(req: Request, res: Response) {
   const { slug } = req.params;
