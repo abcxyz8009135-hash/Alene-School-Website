@@ -71,7 +71,6 @@ export default function EntranceExamResultPage() {
   return (
     <section className="container-page py-16">
       <div className="mx-auto max-w-2xl text-center">
-        <span className="tag-pill">Entrance Exam Result</span>
         <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
           Check Your Exam Result
         </h1>

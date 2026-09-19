@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { Lightbulb, Microscope, Rocket } from "lucide-react";
 import ProgramCard from "@/components/ProgramCard";
-import { STEM_GALLERY_IMAGES, STEM_HERO_IMAGE } from "@/lib/constants";
-import { getProgramsByCategory } from "@/lib/programs";
+import { fetchProgramsByCategory } from "@/lib/programs";
+import { fetchSettings } from "@/lib/settings";
 
 const PROGRAM_FEATURES = [
   {
@@ -22,14 +22,25 @@ const PROGRAM_FEATURES = [
   },
 ];
 
-const STEM_PROGRAMS = getProgramsByCategory("stem-center");
+export default async function StemCenterPage() {
+  const [STEM_PROGRAMS, settings] = await Promise.all([
+    fetchProgramsByCategory("stem-center"),
+    fetchSettings(),
+  ]);
 
-export default function StemCenterPage() {
+  const galleryImages = [
+    settings.stemGalleryImage1,
+    settings.stemGalleryImage2,
+    settings.stemGalleryImage3,
+    settings.stemGalleryImage4,
+    settings.stemGalleryImage5,
+    settings.stemGalleryImage6,
+  ];
+
   return (
     <>
       <section className="border-b border-slate-200 bg-slate-50 py-16">
         <div className="container-page">
-          <span className="tag-pill">STEM Center</span>
           <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
             Science &amp; Technology, Reimagined
           </h1>
@@ -86,9 +97,9 @@ export default function StemCenterPage() {
           A glimpse into our science, web, and robotics facilities.
         </p>
         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {STEM_GALLERY_IMAGES.map((src, i) => (
+          {galleryImages.map((src, i) => (
             <div
-              key={src}
+              key={i}
               className={`relative overflow-hidden rounded-xl border border-slate-200 ${
                 i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto" : "aspect-square"
               }`}
@@ -109,7 +120,7 @@ export default function StemCenterPage() {
       <section className="container-page pb-20">
         <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-slate-200 sm:h-80">
           <div className="skeleton absolute inset-0" />
-          <Image src={STEM_HERO_IMAGE} alt="STEM Center facilities" fill className="object-cover" />
+          <Image src={settings.stemHeroImage} alt="STEM Center facilities" fill className="object-cover" />
         </div>
       </section>
     </>

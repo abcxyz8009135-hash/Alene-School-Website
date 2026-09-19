@@ -1,24 +1,35 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import AdminModal from "@/components/admin/AdminModal";
-import { adminFetch, adminUploadImage, AdminApiError } from "@/lib/adminApi";
-import type { NewsArticle } from "@/lib/types";
+import { adminFetch } from "@/lib/adminApi";
+
+interface Program {
+  id: string;
+  slug: string;
+  category: "stem-center" | "hobbies";
+  title: string;
+  imageUrl: string;
+  summary: string;
+  description: string;
+  curriculumHighlights: string[];
+  establishedYear: number;
+}
 
 const EMPTY_FORM = {
-  title: "",
   slug: "",
-  excerpt: "",
-  content: "",
-  category: "Achievements",
+  category: "stem-center" as Program["category"],
+  title: "",
   imageUrl: "",
+  summary: "",
+  description: "",
+  curriculumHighlightsText: "",
+  establishedYear: new Date().getFullYear(),
 };
 
-const CATEGORIES = ["Achievements", "Campus", "Admissions", "Events"];
-
-export default function AdminNewsPage() {
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
+export default function AdminProgramContentPage() {
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,22 +38,21 @@ export default function AdminNewsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
-  async function loadArticles() {
+  async function loadPrograms() {
     setLoading(true);
     try {
-      const data = await adminFetch("/admin/news");
-      setArticles(data.articles);
+      const data = await adminFetch("/admin/programs");
+      setPrograms(data.programs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load news.");
+      setError(err instanceof Error ? err.message : "Failed to load programs.");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadArticles();
+    loadPrograms();
   }, []);
 
   function openCreate() {
@@ -52,15 +62,17 @@ export default function AdminNewsPage() {
     setModalOpen(true);
   }
 
-  function openEdit(article: NewsArticle) {
-    setEditingId(article.id);
+  function openEdit(program: Program) {
+    setEditingId(program.id);
     setForm({
-      title: article.title,
-      slug: article.slug,
-      excerpt: article.excerpt,
-      content: article.content,
-      category: article.category,
-      imageUrl: article.imageUrl,
+      slug: program.slug,
+      category: program.category,
+      title: program.title,
+      imageUrl: program.imageUrl,
+      summary: program.summary,
+      description: program.description,
+      curriculumHighlightsText: program.curriculumHighlights.join("\n"),
+      establishedYear: program.establishedYear,
     });
     setFormError(null);
     setModalOpen(true);
@@ -71,51 +83,48 @@ export default function AdminNewsPage() {
     setSaving(true);
     setFormError(null);
 
+    const payload = {
+      slug: form.slug,
+      category: form.category,
+      title: form.title,
+      imageUrl: form.imageUrl,
+      summary: form.summary,
+      description: form.description,
+      curriculumHighlights: form.curriculumHighlightsText
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+      establishedYear: form.establishedYear,
+    };
+
     try {
       if (editingId) {
-        await adminFetch(`/admin/news/${editingId}`, {
+        await adminFetch(`/admin/programs/${editingId}`, {
           method: "PUT",
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         });
       } else {
-        await adminFetch("/admin/news", {
+        await adminFetch("/admin/programs", {
           method: "POST",
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         });
       }
       setModalOpen(false);
-      await loadArticles();
+      await loadPrograms();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to save article.");
+      setFormError(err instanceof Error ? err.message : "Failed to save program.");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    setUploading(true);
-    setFormError(null);
-    try {
-      const url = await adminUploadImage(file);
-      setForm((f) => ({ ...f, imageUrl: url }));
-    } catch (err) {
-      setFormError(err instanceof AdminApiError ? err.message : "Image upload failed.");
-    } finally {
-      setUploading(false);
-    }
-  }
-
   async function handleDelete(id: string) {
-    if (!confirm("Delete this article? This cannot be undone.")) return;
+    if (!confirm("Delete this program? This cannot be undone.")) return;
     try {
-      await adminFetch(`/admin/news/${id}`, { method: "DELETE" });
-      setArticles((prev) => prev.filter((a) => a.id !== id));
+      await adminFetch(`/admin/programs/${id}`, { method: "DELETE" });
+      setPrograms((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete article.");
+      alert(err instanceof Error ? err.message : "Failed to delete program.");
     }
   }
 
@@ -123,12 +132,14 @@ export default function AdminNewsPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-ink-900">News Articles</h1>
-          <p className="mt-1 text-sm text-ink-500">Create, edit, and remove news posts.</p>
+          <h1 className="text-2xl font-bold text-ink-900">Programs</h1>
+          <p className="mt-1 text-sm text-ink-500">
+            Manage the STEM Center &amp; Hobbies program listings shown sitewide.
+          </p>
         </div>
         <button onClick={openCreate} className="btn-primary">
           <Plus className="h-4 w-4" />
-          New Article
+          New Program
         </button>
       </div>
 
@@ -144,7 +155,7 @@ export default function AdminNewsPage() {
             <tr>
               <th className="px-5 py-3">Title</th>
               <th className="px-5 py-3">Category</th>
-              <th className="px-5 py-3">Published</th>
+              <th className="px-5 py-3">Slug</th>
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -156,31 +167,31 @@ export default function AdminNewsPage() {
                 </td>
               </tr>
             )}
-            {!loading && articles.length === 0 && (
+            {!loading && programs.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-5 py-8 text-center text-ink-400">
-                  No news articles yet.
+                  No programs yet.
                 </td>
               </tr>
             )}
-            {articles.map((article) => (
-              <tr key={article.id}>
+            {programs.map((program) => (
+              <tr key={program.id}>
                 <td className="max-w-xs truncate px-5 py-3 font-medium text-ink-900">
-                  {article.title}
+                  {program.title}
                 </td>
                 <td className="px-5 py-3">
-                  <span className="tag-pill">{article.category}</span>
+                  <span className="tag-pill">
+                    {program.category === "stem-center" ? "STEM Center" : "Hobbies"}
+                  </span>
                 </td>
-                <td className="px-5 py-3 text-ink-500">
-                  {new Date(article.publishedAt).toLocaleDateString()}
-                </td>
+                <td className="px-5 py-3 text-ink-500">{program.slug}</td>
                 <td className="px-5 py-3">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => openEdit(article)} className="btn-icon">
+                    <button onClick={() => openEdit(program)} className="btn-icon">
                       <Pencil className="h-3.5 w-3.5" />
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(article.id)} className="btn-danger">
+                    <button onClick={() => handleDelete(program.id)} className="btn-danger">
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete
                     </button>
@@ -194,7 +205,7 @@ export default function AdminNewsPage() {
 
       <AdminModal
         open={modalOpen}
-        title={editingId ? "Edit Article" : "New Article"}
+        title={editingId ? "Edit Program" : "New Program"}
         onClose={() => setModalOpen(false)}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -214,77 +225,74 @@ export default function AdminNewsPage() {
               value={form.slug}
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
               className="input-field"
-              placeholder="example-article-slug"
+              placeholder="web-development"
             />
           </div>
           <div>
             <label className="form-label">Category</label>
             <select
               value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, category: e.target.value as Program["category"] }))
+              }
               className="input-field"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+              <option value="stem-center">STEM Center</option>
+              <option value="hobbies">Hobbies</option>
             </select>
           </div>
           <div>
-            <label className="form-label">Image</label>
-            <div className="flex items-center gap-3">
-              <label className="btn-icon cursor-pointer">
-                {uploading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Upload className="h-3.5 w-3.5" />
-                )}
-                Upload from computer
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={handleImageSelect}
-                />
-              </label>
-              {form.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={form.imageUrl}
-                  alt="Preview"
-                  className="h-10 w-10 rounded-lg object-cover ring-1 ring-inset ring-slate-200"
-                />
-              )}
-            </div>
+            <label className="form-label">Image URL</label>
             <input
               required
               type="url"
               value={form.imageUrl}
               onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
-              className="input-field mt-2"
-              placeholder="https://images.unsplash.com/... (or upload a file above)"
+              className="input-field"
             />
           </div>
           <div>
-            <label className="form-label">Excerpt</label>
+            <label className="form-label">Summary</label>
             <textarea
               required
               rows={2}
-              value={form.excerpt}
-              onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+              value={form.summary}
+              onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
               className="input-field resize-none"
             />
           </div>
           <div>
-            <label className="form-label">Content</label>
+            <label className="form-label">Description</label>
             <textarea
               required
               rows={4}
-              value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+              value={form.description}
+              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               className="input-field resize-none"
+            />
+          </div>
+          <div>
+            <label className="form-label">Curriculum Highlights (one per line)</label>
+            <textarea
+              required
+              rows={4}
+              value={form.curriculumHighlightsText}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, curriculumHighlightsText: e.target.value }))
+              }
+              className="input-field resize-none"
+            />
+          </div>
+          <div>
+            <label className="form-label">Established Year</label>
+            <input
+              required
+              type="number"
+              value={form.establishedYear}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, establishedYear: Number(e.target.value) }))
+              }
+              className="input-field"
             />
           </div>
 
@@ -296,7 +304,7 @@ export default function AdminNewsPage() {
 
           <button type="submit" disabled={saving} className="btn-primary w-full">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editingId ? "Save Changes" : "Create Article"}
+            {editingId ? "Save Changes" : "Create Program"}
           </button>
         </form>
       </AdminModal>

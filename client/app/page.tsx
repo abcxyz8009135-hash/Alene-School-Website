@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Compass, Target, Cpu, Bot, FlaskConical, ArrowRight, CalendarDays } from "lucide-react";
 import HeroCarousel from "@/components/HeroCarousel";
-import { API_BASE_URL, HERO_IMG_1 } from "@/lib/constants";
+import { API_BASE_URL } from "@/lib/constants";
 import { MOCK_ACHIEVEMENTS } from "@/lib/programs";
+import { fetchSettings } from "@/lib/settings";
 import type { NewsArticle } from "@/lib/types";
 
 // ISR: home page content (news preview) is revalidated every 60 seconds.
@@ -48,14 +49,20 @@ async function getNewsPreview() {
 }
 
 export default async function HomePage() {
-  const newsPreview = await getNewsPreview();
+  const [newsPreview, settings] = await Promise.all([getNewsPreview(), fetchSettings()]);
   const featuredAchievement = MOCK_ACHIEVEMENTS.find(
     (a) => a.programSlug === "robotics-automation"
   );
 
+  const heroSlides = [
+    { id: 1, image: settings.heroSlide1Image, title: settings.heroSlide1Title, subtitle: settings.heroSlide1Subtitle },
+    { id: 2, image: settings.heroSlide2Image, title: settings.heroSlide2Title, subtitle: settings.heroSlide2Subtitle },
+    { id: 3, image: settings.heroSlide3Image, title: settings.heroSlide3Title, subtitle: settings.heroSlide3Subtitle },
+  ];
+
   return (
     <>
-      <HeroCarousel />
+      <HeroCarousel slides={heroSlides} schoolMotto={settings.schoolMotto} />
 
       {/* Mission / Vision */}
       <section className="container-page py-20">
@@ -139,7 +146,7 @@ export default async function HomePage() {
           </div>
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-slate-200">
             <div className="skeleton absolute inset-0" />
-            <Image src={HERO_IMG_1} alt="Students working in STEM lab" fill className="object-cover" />
+            <Image src={settings.homeStemImage} alt="Students working in STEM lab" fill className="object-cover" />
           </div>
         </div>
       </section>
@@ -195,14 +202,17 @@ export default async function HomePage() {
       <section className="container-page pb-20">
         <div className="card flex flex-col items-center gap-4 bg-slate-50 px-8 py-14 text-center">
           <h2 className="text-2xl font-bold text-ink-900 sm:text-3xl">
-            Ready to Join Alene High School?
+            Ready to Join {settings.schoolName}?
           </h2>
           <p className="max-w-xl text-sm text-ink-500">
             Check your entrance exam result or get in touch with our admissions
             team to learn more about enrollment.
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <Link href="/entrance-exam-result" className="btn-primary">
+            <Link href="/apply" className="btn-primary">
+              Apply Now
+            </Link>
+            <Link href="/entrance-exam-result" className="btn-secondary">
               Check Exam Result
             </Link>
             <Link href="/contact-us" className="btn-secondary">

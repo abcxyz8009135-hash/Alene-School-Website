@@ -1,7 +1,10 @@
 import { API_BASE_URL } from "./constants";
 import type { Program, ProgramAchievement, ProgramCategory } from "./types";
 
-export const PROGRAMS: Program[] = [
+// Static fallback used only if the live /api/programs endpoint is unreachable
+// or has no records yet (e.g. before an admin has added programs via the
+// Site Content admin dashboard).
+const FALLBACK_PROGRAMS: Program[] = [
   {
     slug: "web-development",
     category: "stem-center",
@@ -42,8 +45,7 @@ export const PROGRAMS: Program[] = [
     slug: "science-lab",
     category: "stem-center",
     title: "Science Lab",
-    summary:
-      "Laboratory experiments, genetics fundamentals, and environmental research.",
+    summary: "Laboratory experiments, genetics fundamentals, and environmental research.",
     description:
       "The Science Lab gives students hands-on laboratory experience across physics, chemistry, biology, genetics, and environmental science. Students design and run original research projects, many of which are presented at regional science fairs and community environmental initiatives.",
     imageSrc:
@@ -260,15 +262,56 @@ export const MOCK_ACHIEVEMENTS: ProgramAchievement[] = [
   },
 ];
 
-export function getProgramsByCategory(category: ProgramCategory): Program[] {
-  return PROGRAMS.filter((p) => p.category === category);
+interface ApiProgram {
+  slug: string;
+  category: ProgramCategory;
+  title: string;
+  summary: string;
+  description: string;
+  imageUrl: string;
+  curriculumHighlights: string[];
+  establishedYear: number;
 }
 
-export function getProgramBySlug(
+function mapApiProgram(p: ApiProgram): Program {
+  return {
+    slug: p.slug,
+    category: p.category,
+    title: p.title,
+    summary: p.summary,
+    description: p.description,
+    imageSrc: p.imageUrl,
+    curriculumHighlights: p.curriculumHighlights,
+    establishedYear: p.establishedYear,
+  };
+}
+
+/**
+ * Fetches live program records for a category, falling back to static data
+ * when the API is unreachable or has no records yet.
+ */
+export async function fetchProgramsByCategory(category: ProgramCategory): Promise<Program[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/programs?category=${category}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) throw new Error("Programs request failed");
+    const data = await res.json();
+    if (Array.isArray(data.programs) && data.programs.length > 0) {
+      return data.programs.map(mapApiProgram);
+    }
+    return FALLBACK_PROGRAMS.filter((p) => p.category === category);
+  } catch {
+    return FALLBACK_PROGRAMS.filter((p) => p.category === category);
+  }
+}
+
+export async function fetchProgramBySlug(
   category: ProgramCategory,
   slug: string
-): Program | undefined {
-  return PROGRAMS.find((p) => p.category === category && p.slug === slug);
+): Promise<Program | undefined> {
+  const programs = await fetchProgramsByCategory(category);
+  return programs.find((p) => p.slug === slug);
 }
 
 export function getMockAchievements(slug: string): ProgramAchievement[] {

@@ -4,24 +4,35 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { HERO_SLIDES } from "@/lib/constants";
 
-export default function HeroCarousel() {
+export interface HeroSlide {
+  id: number;
+  image: string;
+  title: string;
+  subtitle: string;
+}
+
+interface HeroCarouselProps {
+  slides: HeroSlide[];
+  schoolMotto?: string;
+}
+
+export default function HeroCarousel({ slides, schoolMotto }: HeroCarouselProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % HERO_SLIDES.length);
+      setIndex((i) => (i + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
-  const next = () => setIndex((i) => (i + 1) % HERO_SLIDES.length);
-  const prev = () => setIndex((i) => (i - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const next = () => setIndex((i) => (i + 1) % slides.length);
+  const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
 
   return (
     <div className="relative h-[70vh] min-h-[480px] w-full overflow-hidden bg-ink-900">
-      {HERO_SLIDES.map((slide, i) => (
+      {slides.map((slide, i) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-1000 ${
@@ -41,12 +52,14 @@ export default function HeroCarousel() {
       ))}
 
       <div className="container-page relative flex h-full flex-col items-start justify-end pb-20">
-        <span className="tag-pill bg-white/90 ring-white/40">Est. Excellence</span>
+        <span className="tag-pill bg-white/90 ring-white/40">
+          {schoolMotto || "Est. Excellence"}
+        </span>
         <h1 className="max-w-2xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-          {HERO_SLIDES[index].title}
+          {slides[index].title}
         </h1>
         <p className="mt-4 max-w-xl text-base text-slate-200 sm:text-lg">
-          {HERO_SLIDES[index].subtitle}
+          {slides[index].subtitle}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/entrance-exam-result" className="btn-primary">
@@ -77,7 +90,7 @@ export default function HeroCarousel() {
       </button>
 
       <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 gap-2">
-        {HERO_SLIDES.map((slide, i) => (
+        {slides.map((slide, i) => (
           <button
             key={slide.id}
             onClick={() => setIndex(i)}

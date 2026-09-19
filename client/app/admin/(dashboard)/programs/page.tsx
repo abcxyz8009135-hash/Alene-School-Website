@@ -4,12 +4,17 @@ import { FormEvent, useEffect, useState } from "react";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import AdminModal from "@/components/admin/AdminModal";
 import { adminFetch } from "@/lib/adminApi";
-import { PROGRAMS } from "@/lib/programs";
 import type { ProgramAchievement, ProgramCategory } from "@/lib/types";
 
+interface ProgramOption {
+  slug: string;
+  title: string;
+  category: ProgramCategory;
+}
+
 const EMPTY_FORM = {
-  programSlug: PROGRAMS[0].slug,
-  category: PROGRAMS[0].category as ProgramCategory,
+  programSlug: "",
+  category: "stem-center" as ProgramCategory,
   title: "",
   description: "",
   year: new Date().getFullYear(),
@@ -19,6 +24,7 @@ const EMPTY_FORM = {
 
 export default function AdminProgramsPage() {
   const [achievements, setAchievements] = useState<ProgramAchievement[]>([]);
+  const [programs, setPrograms] = useState<ProgramOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +37,19 @@ export default function AdminProgramsPage() {
   async function loadAchievements() {
     setLoading(true);
     try {
-      const data = await adminFetch("/admin/achievements");
-      setAchievements(data.achievements);
+      const [achievementsData, programsData] = await Promise.all([
+        adminFetch("/admin/achievements"),
+        adminFetch("/admin/programs"),
+      ]);
+      setAchievements(achievementsData.achievements);
+      setPrograms(programsData.programs);
+      if (programsData.programs[0]) {
+        setForm((f) => ({
+          ...f,
+          programSlug: f.programSlug || programsData.programs[0].slug,
+          category: f.programSlug ? f.category : programsData.programs[0].category,
+        }));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load achievements.");
     } finally {
@@ -42,11 +59,16 @@ export default function AdminProgramsPage() {
 
   useEffect(() => {
     loadAchievements();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function openCreate() {
     setEditingId(null);
-    setForm(EMPTY_FORM);
+    setForm({
+      ...EMPTY_FORM,
+      programSlug: programs[0]?.slug ?? "",
+      category: programs[0]?.category ?? "stem-center",
+    });
     setFormError(null);
     setModalOpen(true);
   }
@@ -109,7 +131,7 @@ export default function AdminProgramsPage() {
   }
 
   function handleProgramChange(slug: string) {
-    const program = PROGRAMS.find((p) => p.slug === slug);
+    const program = programs.find((p) => p.slug === slug);
     setForm((f) => ({
       ...f,
       programSlug: slug,
@@ -166,7 +188,7 @@ export default function AdminProgramsPage() {
             {achievements.map((achievement) => (
               <tr key={achievement.id}>
                 <td className="px-5 py-3 text-ink-700">
-                  {PROGRAMS.find((p) => p.slug === achievement.programSlug)?.title ??
+                  {programs.find((p) => p.slug === achievement.programSlug)?.title ??
                     achievement.programSlug}
                 </td>
                 <td className="max-w-xs truncate px-5 py-3 font-medium text-ink-900">
@@ -207,7 +229,7 @@ export default function AdminProgramsPage() {
               onChange={(e) => handleProgramChange(e.target.value)}
               className="input-field"
             >
-              {PROGRAMS.map((p) => (
+              {programs.map((p) => (
                 <option key={p.slug} value={p.slug}>
                   {p.title} ({p.category === "stem-center" ? "STEM Center" : "Hobbies"})
                 </option>

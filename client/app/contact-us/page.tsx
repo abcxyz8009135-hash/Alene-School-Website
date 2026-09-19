@@ -8,7 +8,6 @@ import { CONTACT_INFO } from "@/lib/constants";
 export default function ContactUsPage() {
   return (
     <section className="container-page py-16">
-      <span className="tag-pill">Contact Us</span>
       <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
         Get in Touch
       </h1>

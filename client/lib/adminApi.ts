@@ -71,3 +71,27 @@ export async function adminFetch(path: string, options: RequestInit = {}) {
 
   return data;
 }
+
+/**
+ * Uploads an image file to the admin upload endpoint and returns its public URL.
+ * Uses a bare fetch (not adminFetch) so the browser sets the multipart boundary itself.
+ */
+export async function adminUploadImage(file: File): Promise<string> {
+  const token = getAdminToken();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_BASE_URL}/admin/upload`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new AdminApiError(data.message || "Image upload failed.", res.status);
+  }
+
+  return data.url as string;
+}

@@ -6,10 +6,14 @@ import { useRouter, usePathname } from "next/navigation";
 import {
   Award,
   ClipboardList,
+  FileText,
+  KeyRound,
   LayoutDashboard,
   Loader2,
   LogOut,
   Newspaper,
+  Settings,
+  UserPlus,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/constants";
 import {
@@ -24,7 +28,11 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "News", href: "/admin/news", icon: Newspaper },
   { label: "Exam Results", href: "/admin/results", icon: ClipboardList },
-  { label: "Program Achievements", href: "/admin/programs", icon: Award },
+  { label: "Programs", href: "/admin/program-content", icon: FileText },
+  { label: "Achievements", href: "/admin/programs", icon: Award },
+  { label: "Site Content", href: "/admin/content", icon: Settings },
+  { label: "Access Requests", href: "/admin/access-requests", icon: UserPlus },
+  { label: "Account", href: "/admin/account", icon: KeyRound },
 ];
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {

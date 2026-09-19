@@ -75,7 +75,6 @@ export default async function NewsPage() {
 
   return (
     <section className="container-page py-16">
-      <span className="tag-pill">News &amp; Updates</span>
       <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
         What&apos;s Happening at Alene High School
       </h1>

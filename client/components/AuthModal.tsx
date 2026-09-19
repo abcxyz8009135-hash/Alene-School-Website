@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/constants";
 
@@ -9,10 +10,18 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-type Mode = "login" | "register";
+type Mode = "login" | "request-access";
+type PortalRole = "student" | "teacher";
+
+const ROLE_OPTIONS: { value: PortalRole; label: string }[] = [
+  { value: "student", label: "Student" },
+  { value: "teacher", label: "Teacher / Principal" },
+];
 
 export default function AuthModal({ open, onClose }: AuthModalProps) {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+  const [role, setRole] = useState<PortalRole>("student");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,21 +31,26 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
   if (!open) return null;
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  function resetFeedback() {
     setError(null);
     setSuccess(null);
+  }
+
+  function switchMode(next: Mode) {
+    setMode(next);
+    resetFeedback();
+  }
+
+  async function handleLogin(e: FormEvent) {
+    e.preventDefault();
+    resetFeedback();
     setLoading(true);
 
     try {
-      const endpoint = mode === "login" ? "/auth/login" : "/auth/register";
-      const body =
-        mode === "login" ? { email, password } : { fullName, email, password };
-
-      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password, role }),
       });
 
       const data = await res.json();
@@ -45,10 +59,44 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         throw new Error(data.message || "Something went wrong.");
       }
 
-      setSuccess(mode === "login" ? "Logged in successfully." : "Account created successfully.");
       if (typeof window !== "undefined" && data.token) {
         window.localStorage.setItem("alene_hs_token", data.token);
+        window.localStorage.setItem("alene_hs_user", JSON.stringify(data.user));
       }
+
+      onClose();
+      router.push("/portal");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRequestAccess(e: FormEvent) {
+    e.preventDefault();
+    resetFeedback();
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/request-access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, role }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong.");
+      }
+
+      setSuccess(
+        data.message ||
+          "Your request has been submitted to school administration for review."
+      );
+      setFullName("");
+      setEmail("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -74,12 +122,12 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
         <div className="mb-6">
           <h2 className="text-xl font-bold text-ink-900">
-            {mode === "login" ? "Welcome back" : "Create your account"}
+            {mode === "login" ? "Log in to Portal" : "Request Portal Access"}
           </h2>
           <p className="mt-1 text-sm text-ink-500">
             {mode === "login"
-              ? "Sign in to access your Alene High School account."
-              : "Join the Alene High School community portal."}
+              ? "Sign in to access the Alene High School student & staff portal."
+              : "Ask school administration to set up your portal account."}
           </p>
         </div>
 
@@ -88,22 +136,47 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             className={`flex-1 rounded-md py-2 text-sm font-semibold transition ${
               mode === "login" ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
             }`}
-            onClick={() => setMode("login")}
+            onClick={() => switchMode("login")}
           >
             Log In
           </button>
           <button
             className={`flex-1 rounded-md py-2 text-sm font-semibold transition ${
-              mode === "register" ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
+              mode === "request-access"
+                ? "bg-brand-600 text-white"
+                : "text-ink-500 hover:text-ink-900"
             }`}
-            onClick={() => setMode("register")}
+            onClick={() => switchMode("request-access")}
           >
-            Sign Up
+            Request Portal Access
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === "register" && (
+        <form
+          onSubmit={mode === "login" ? handleLogin : handleRequestAccess}
+          className="space-y-4"
+        >
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-ink-700">I am a</label>
+            <div className="flex gap-2">
+              {ROLE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRole(option.value)}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                    role === option.value
+                      ? "border-brand-600 bg-brand-50 text-brand-700"
+                      : "border-slate-300 text-ink-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {mode === "request-access" && (
             <div>
               <label className="mb-1.5 block text-sm font-medium text-ink-700">
                 Full Name
@@ -129,18 +202,20 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
               placeholder="you@example.com"
             />
           </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-700">Password</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-              placeholder="••••••••"
-            />
-          </div>
+          {mode === "login" && (
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
 
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-inset ring-red-200">
@@ -155,7 +230,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
           <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === "login" ? "Log In" : "Create Account"}
+            {mode === "login" ? "Log In" : "Submit Request"}
           </button>
         </form>
       </div>

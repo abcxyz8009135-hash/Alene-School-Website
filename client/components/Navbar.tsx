@@ -7,8 +7,13 @@ import { Menu, X, UserCircle } from "lucide-react";
 import Logo from "./Logo";
 import AuthModal from "./AuthModal";
 import { NAV_LINKS } from "@/lib/constants";
+import type { SiteSettings } from "@/lib/settings";
 
-export default function Navbar() {
+interface NavbarProps {
+  settings: SiteSettings;
+}
+
+export default function Navbar({ settings }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const pathname = usePathname();
@@ -17,7 +22,11 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-md">
         <nav className="container-page flex h-16 items-center justify-between">
-          <Logo />
+          <Logo
+            logoUrl={settings.logoUrl}
+            schoolName={settings.schoolName}
+            schoolShortName={settings.schoolShortName}
+          />
 
           <div className="hidden items-center gap-1 lg:flex">
             {NAV_LINKS.map((link) => {
@@ -41,7 +50,7 @@ export default function Navbar() {
           <div className="hidden items-center gap-3 lg:flex">
             <button onClick={() => setAuthOpen(true)} className="btn-primary">
               <UserCircle className="h-4 w-4" />
-              Login / Sign Up
+              Portal Login
             </button>
           </div>
 
@@ -82,7 +91,7 @@ export default function Navbar() {
                 className="btn-primary mt-2"
               >
                 <UserCircle className="h-4 w-4" />
-                Login / Sign Up
+                Portal Login
               </button>
             </div>
           </div>
