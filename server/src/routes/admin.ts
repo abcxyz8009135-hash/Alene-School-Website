@@ -1,6 +1,8 @@
 import { Router } from "express";
+import multer from "multer";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import { getDashboardStats } from "../controllers/adminController.js";
+import { uploadImage } from "../controllers/adminUploadController.js";
 import {
   createNews,
   deleteNews,
@@ -19,6 +21,20 @@ import {
   listAchievementsAdmin,
   updateAchievement,
 } from "../controllers/adminProgramsController.js";
+import {
+  createProgram,
+  deleteProgram,
+  listProgramsAdmin,
+  updateProgram,
+} from "../controllers/adminProgramContentController.js";
+import { updateSettings } from "../controllers/adminSettingsController.js";
+import {
+  approveAccessRequest,
+  listAccessRequests,
+  rejectAccessRequest,
+} from "../controllers/adminAccessRequestController.js";
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = Router();
 
@@ -26,6 +42,8 @@ const router = Router();
 router.use(requireAuth, requireAdmin);
 
 router.get("/stats", getDashboardStats);
+
+router.post("/upload", upload.single("file"), uploadImage);
 
 router.get("/news", listNewsAdmin);
 router.post("/news", createNews);
@@ -41,5 +59,16 @@ router.get("/achievements", listAchievementsAdmin);
 router.post("/achievements", createAchievement);
 router.put("/achievements/:id", updateAchievement);
 router.delete("/achievements/:id", deleteAchievement);
+
+router.get("/programs", listProgramsAdmin);
+router.post("/programs", createProgram);
+router.put("/programs/:id", updateProgram);
+router.delete("/programs/:id", deleteProgram);
+
+router.put("/settings", updateSettings);
+
+router.get("/access-requests", listAccessRequests);
+router.post("/access-requests/:id/approve", approveAccessRequest);
+router.post("/access-requests/:id/reject", rejectAccessRequest);
 
 export default router;

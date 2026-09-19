@@ -1,6 +1,21 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 
+export async function listPrograms(req: Request, res: Response) {
+  const { category } = req.query;
+
+  try {
+    const programs = await prisma.program.findMany({
+      where: typeof category === "string" ? { category } : undefined,
+      orderBy: { title: "asc" },
+    });
+    return res.status(200).json({ programs });
+  } catch (error) {
+    console.error("Error listing programs:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+}
+
 export async function getProgramAchievements(req: Request, res: Response) {
   const { slug } = req.params;
 

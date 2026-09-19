@@ -8,9 +8,15 @@ import newsRoutes from "./routes/news.js";
 import authRoutes from "./routes/auth.js";
 import programsRoutes from "./routes/programs.js";
 import adminRoutes from "./routes/admin.js";
+import settingsRoutes from "./routes/settings.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Render sits behind a reverse proxy — without this, express-rate-limit
+// either sees every request as coming from the proxy's single IP (rate
+// limits everyone together) or throws on the X-Forwarded-For header.
+app.set("trust proxy", 1);
 
 // Base allowed origins
 const allowedOrigins = [
@@ -64,6 +70,7 @@ app.use("/api/news", newsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/programs", programsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found." });
