@@ -19,12 +19,12 @@ export default function AdminModal({ open, title, onClose, children }: AdminModa
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-card sm:p-8">
+      <div className="relative w-full max-w-lg rounded-2xl border border-ink-200 bg-white p-6 shadow-card sm:p-8">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-bold text-ink-900">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-400 transition hover:bg-slate-100 hover:text-ink-900"
+            className="rounded-lg p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-900"
             aria-label="Close"
           >
             <X className="h-5 w-5" />

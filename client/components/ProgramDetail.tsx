@@ -1,12 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Award, CalendarClock, CheckCircle2, TrendingUp } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import PageHeader from "./PageHeader";
+import Reveal from "./Reveal";
+import { CATEGORY_LABEL, CATEGORY_ROUTE } from "@/lib/constants";
 import type { Program, ProgramAchievement } from "@/lib/types";
-
-const CATEGORY_LABEL: Record<Program["category"], string> = {
-  "stem-center": "STEM Center",
-  hobbies: "Hobbies & Co-Curriculars",
-};
 
 interface ProgramDetailProps {
   program: Program;
@@ -14,88 +11,76 @@ interface ProgramDetailProps {
 }
 
 export default function ProgramDetail({ program, achievements }: ProgramDetailProps) {
-  const categoryHref = `/${program.category}`;
-
   return (
     <>
-      <section className="relative flex h-[34vh] min-h-[260px] items-end overflow-hidden">
-        <div className="skeleton absolute inset-0" />
-        <Image src={program.imageSrc} alt={program.title} fill priority className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/40 to-ink-950/10" />
-        <div className="container-page relative pb-10">
-          <Link
-            href={categoryHref}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to {CATEGORY_LABEL[program.category]}
-          </Link>
-          <h1 className="mt-4 text-4xl font-bold text-white sm:text-5xl">{program.title}</h1>
-          <p className="mt-2 text-sm text-white/80">
-            Established {program.establishedYear} · {CATEGORY_LABEL[program.category]}
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow={CATEGORY_LABEL[program.category]}
+        title={program.title}
+        intro={program.summary}
+        image={program.imageSrc}
+        imageAlt={program.title}
+      >
+        <Link href={CATEGORY_ROUTE[program.category]} className="link-arrow">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to {CATEGORY_LABEL[program.category]}
+        </Link>
+      </PageHeader>
 
-      <section className="container-page py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-ink-900">Program Overview</h2>
-            <p className="mt-4 leading-relaxed text-ink-500">{program.description}</p>
+      <section className="section-y-sm border-t border-ink-200">
+        <div className="container-page grid grid-cols-1 gap-14 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <p className="eyebrow">Overview</p>
+            <h2 className="section-heading mt-5">About the program</h2>
+            <p className="prose-body mt-6 lg:text-lg">{program.description}</p>
 
-            <h3 className="mt-10 text-lg font-semibold text-ink-900">Curriculum Highlights</h3>
-            <ul className="mt-4 space-y-3">
-              {program.curriculumHighlights.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm text-ink-600">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {program.curriculumHighlights.length > 0 && (
+              <>
+                <h3 className="mt-14 font-display text-xl font-bold text-ink-900">What students do</h3>
+                <ol className="mt-6 divide-y divide-ink-200 border-y border-ink-200">
+                  {program.curriculumHighlights.map((item, i) => (
+                    <li key={item} className="grid grid-cols-[3rem_1fr] gap-3 py-4">
+                      <span className="font-display font-semibold tabular-nums text-brand-600">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-ink-700">{item}</span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+            {program.establishedYear ? (
+              <p className="mt-8 text-sm text-ink-500">Established {program.establishedYear}</p>
+            ) : null}
           </div>
 
-          <div>
-            <div className="card p-6">
-              <div className="flex items-center gap-2.5">
-                <Award className="h-5 w-5 text-brand-600" />
-                <h3 className="font-semibold text-ink-900">Key Achievements</h3>
-              </div>
-              <p className="mt-1 text-xs text-ink-400">
-                Since establishment in {program.establishedYear}
-              </p>
+          <aside aria-labelledby="program-achievements" className="lg:col-span-5">
+            <div className="border-t-4 border-crimson-600 bg-ink-50 p-6 sm:p-8">
+              <p className="eyebrow">Achievements</p>
+              <h2 id="program-achievements" className="mt-4 font-display text-2xl font-bold text-ink-900">
+                Student results
+              </h2>
 
-              <div className="mt-5 space-y-5">
-                {achievements.length === 0 && (
-                  <p className="text-sm text-ink-500">
-                    Achievement records for this program are being compiled.
-                  </p>
-                )}
-                {achievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className="border-l-2 border-brand-200 pl-4"
-                  >
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-ink-400">
-                      <CalendarClock className="h-3.5 w-3.5" />
-                      {achievement.year}
-                    </div>
-                    <h4 className="mt-1 text-sm font-semibold text-ink-900">
-                      {achievement.title}
-                    </h4>
-                    <p className="mt-1 text-xs leading-relaxed text-ink-500">
-                      {achievement.description}
-                    </p>
-                    {achievement.metricLabel && achievement.metricValue && (
-                      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ring-1 ring-inset ring-brand-200">
-                        <TrendingUp className="h-3 w-3" />
-                        {achievement.metricLabel}: {achievement.metricValue}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {achievements.length === 0 ? (
+                <p className="mt-6 text-ink-500">Achievements for this program will be published here.</p>
+              ) : (
+                <ol className="mt-6 space-y-7">
+                  {achievements.map((a, i) => (
+                    <Reveal as="li" key={a.id} delay={i * 60} className="border-l-2 border-brand-600 pl-5">
+                      <p className="text-xs font-bold tabular-nums tracking-[0.14em] text-crimson-600">{a.year}</p>
+                      <h3 className="mt-1.5 font-display font-bold leading-snug text-ink-900">{a.title}</h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-ink-600">{a.description}</p>
+                      {a.metricLabel && a.metricValue && (
+                        <p className="mt-3 text-sm text-ink-500">
+                          <span className="font-display text-xl font-extrabold text-brand-700">{a.metricValue}</span>{" "}
+                          {a.metricLabel.toLowerCase()}
+                        </p>
+                      )}
+                    </Reveal>
+                  ))}
+                </ol>
+              )}
             </div>
-          </div>
+          </aside>
         </div>
       </section>
     </>

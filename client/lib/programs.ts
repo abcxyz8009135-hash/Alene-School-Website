@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "./constants";
+import { API_BASE_URL, PHOTOS } from "./constants";
 import type { Program, ProgramAchievement, ProgramCategory } from "./types";
 
 // Static fallback used only if the live /api/programs endpoint is unreachable
@@ -13,8 +13,7 @@ const FALLBACK_PROGRAMS: Program[] = [
       "Modern web engineering — full-stack frameworks and dynamic applications built by students.",
     description:
       "The Web Development track teaches students to design, build, and ship real full-stack applications. Students learn HTML/CSS/JavaScript fundamentals before advancing into modern frameworks, REST APIs, and database-backed projects — culminating in a capstone app each student can showcase in a portfolio.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: "",
     curriculumHighlights: [
       "HTML, CSS & modern JavaScript fundamentals",
       "Full-stack frameworks (React, Node.js, REST APIs)",
@@ -31,8 +30,7 @@ const FALLBACK_PROGRAMS: Program[] = [
       "Mechatronics, Arduino/Raspberry Pi programming, and autonomous mechanical systems.",
     description:
       "Students in Robotics & Automation design and build physical machines that sense and act on the world — combining mechanical design, electronics, and embedded programming with Arduino and Raspberry Pi platforms. The program culminates in regional robotics competitions each year.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1581091870621-1e9b6b3f5c8b?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: PHOTOS.roboticsProject,
     curriculumHighlights: [
       "Mechatronics and circuit design fundamentals",
       "Arduino & Raspberry Pi embedded programming",
@@ -48,8 +46,7 @@ const FALLBACK_PROGRAMS: Program[] = [
     summary: "Laboratory experiments, genetics fundamentals, and environmental research.",
     description:
       "The Science Lab gives students hands-on laboratory experience across physics, chemistry, biology, genetics, and environmental science. Students design and run original research projects, many of which are presented at regional science fairs and community environmental initiatives.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: PHOTOS.microscope,
     curriculumHighlights: [
       "Laboratory safety and experimental design",
       "Genetics and molecular biology fundamentals",
@@ -65,8 +62,7 @@ const FALLBACK_PROGRAMS: Program[] = [
     summary: "Painting, sketching, digital design, choir, and instrumental ensembles.",
     description:
       "Arts & Music brings together every visual and performing arts initiative at Alene High School — from painting and digital design workshops to choir and instrumental ensembles. Students showcase their work at termly exhibitions and school-wide performances.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: "",
     curriculumHighlights: [
       "Painting, sketching & digital design workshops",
       "Choir and instrumental ensemble training",
@@ -82,8 +78,7 @@ const FALLBACK_PROGRAMS: Program[] = [
     summary: "Team sports, track & field, and school-wide fitness programs.",
     description:
       "Sports & Athletics unites all of the school's team sports, track and field, and fitness activities under one program. Students train year-round and compete in inter-school tournaments, with an emphasis on teamwork, discipline, and healthy competition.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: "",
     curriculumHighlights: [
       "Football, basketball & team sports training",
       "Track and field conditioning",
@@ -99,8 +94,7 @@ const FALLBACK_PROGRAMS: Program[] = [
     summary: "Student governance, public speaking, and policy advocacy.",
     description:
       "The Leadership & Student Body Council program trains students in governance, public speaking, and policy advocacy. Elected representatives run school-wide initiatives, mediate student concerns, and represent the student body in decisions that shape school life.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: "",
     curriculumHighlights: [
       "Student council elections & governance structure",
       "Public speaking and debate training",
@@ -116,8 +110,7 @@ const FALLBACK_PROGRAMS: Program[] = [
     summary: "Student outreach, local volunteer initiatives, and social impact projects.",
     description:
       "Community Service connects students with local outreach and volunteer initiatives — from neighborhood clean-up drives to partnerships with local shelters and clinics. The program builds civic responsibility and measurable social impact each academic year.",
-    imageSrc:
-      "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1000&q=80",
+    imageSrc: PHOTOS.cleanup,
     curriculumHighlights: [
       "Neighborhood outreach & volunteer initiatives",
       "Partnerships with local shelters and clinics",
@@ -273,6 +266,16 @@ interface ApiProgram {
   establishedYear: number;
 }
 
+// Programs seeded with stock photos are shown with a real Alene photo when
+// one exists for that program, or an empty "photo coming soon" slot
+// otherwise. Images uploaded by an admin are always kept.
+function resolveProgramImage(slug: string, imageUrl: string) {
+  if (!imageUrl || imageUrl.startsWith("https://images.unsplash.com/")) {
+    return FALLBACK_PROGRAMS.find((p) => p.slug === slug)?.imageSrc ?? "";
+  }
+  return imageUrl;
+}
+
 function mapApiProgram(p: ApiProgram): Program {
   return {
     slug: p.slug,
@@ -280,7 +283,7 @@ function mapApiProgram(p: ApiProgram): Program {
     title: p.title,
     summary: p.summary,
     description: p.description,
-    imageSrc: p.imageUrl,
+    imageSrc: resolveProgramImage(p.slug, p.imageUrl),
     curriculumHighlights: p.curriculumHighlights,
     establishedYear: p.establishedYear,
   };

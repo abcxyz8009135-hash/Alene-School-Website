@@ -1,16 +1,4 @@
-import {
-  ABOUT_HERO_IMAGE,
-  API_BASE_URL,
-  CONTACT_INFO,
-  HERO_IMG_1,
-  HERO_SLIDES,
-  HOBBIES_HERO_IMAGE,
-  SCHOOL_MOTTO,
-  SCHOOL_NAME,
-  SCHOOL_SHORT_NAME,
-  STEM_GALLERY_IMAGES,
-  STEM_HERO_IMAGE,
-} from "./constants";
+import { API_BASE_URL, CONTACT_INFO, PHOTOS, SCHOOL_MOTTO, SCHOOL_NAME, SCHOOL_SHORT_NAME } from "./constants";
 
 export interface SiteSettings {
   schoolName: string;
@@ -25,18 +13,15 @@ export interface SiteSettings {
   instagramUrl: string;
   youtubeUrl: string;
 
-  heroSlide1Image: string;
-  heroSlide1Title: string;
-  heroSlide1Subtitle: string;
-  heroSlide2Image: string;
-  heroSlide2Title: string;
-  heroSlide2Subtitle: string;
-  heroSlide3Image: string;
-  heroSlide3Title: string;
-  heroSlide3Subtitle: string;
-
+  homeHeroImage: string;
+  homeAcademicsImage: string;
   homeStemImage: string;
+  homeAchievementImage: string;
+  homeCommunityImage1: string;
+  homeCommunityImage2: string;
+
   aboutHeroImage: string;
+  /** Hero image for the Community page (key kept from the former Hobbies page). */
   hobbiesHeroImage: string;
   stemHeroImage: string;
 
@@ -66,7 +51,7 @@ export interface SiteSettings {
   principalQuote: string;
 }
 
-const DEFAULT_SETTINGS: SiteSettings = {
+export const DEFAULT_SETTINGS: SiteSettings = {
   schoolName: SCHOOL_NAME,
   schoolShortName: SCHOOL_SHORT_NAME,
   schoolMotto: SCHOOL_MOTTO,
@@ -79,27 +64,23 @@ const DEFAULT_SETTINGS: SiteSettings = {
   instagramUrl: "",
   youtubeUrl: "",
 
-  heroSlide1Image: HERO_SLIDES[0].image,
-  heroSlide1Title: HERO_SLIDES[0].title,
-  heroSlide1Subtitle: HERO_SLIDES[0].subtitle,
-  heroSlide2Image: HERO_SLIDES[1].image,
-  heroSlide2Title: HERO_SLIDES[1].title,
-  heroSlide2Subtitle: HERO_SLIDES[1].subtitle,
-  heroSlide3Image: HERO_SLIDES[2].image,
-  heroSlide3Title: HERO_SLIDES[2].title,
-  heroSlide3Subtitle: HERO_SLIDES[2].subtitle,
+  homeHeroImage: PHOTOS.labPractical,
+  homeAcademicsImage: PHOTOS.assembly,
+  homeStemImage: PHOTOS.roboticsProject,
+  homeAchievementImage: PHOTOS.roboticsAward,
+  homeCommunityImage1: PHOTOS.cleanup,
+  homeCommunityImage2: PHOTOS.painting,
 
-  homeStemImage: HERO_IMG_1,
-  aboutHeroImage: ABOUT_HERO_IMAGE,
-  hobbiesHeroImage: HOBBIES_HERO_IMAGE,
-  stemHeroImage: STEM_HERO_IMAGE,
+  aboutHeroImage: PHOTOS.assembly,
+  hobbiesHeroImage: PHOTOS.painting,
+  stemHeroImage: PHOTOS.microscope,
 
-  stemGalleryImage1: STEM_GALLERY_IMAGES[0],
-  stemGalleryImage2: STEM_GALLERY_IMAGES[1],
-  stemGalleryImage3: STEM_GALLERY_IMAGES[2],
-  stemGalleryImage4: STEM_GALLERY_IMAGES[3],
-  stemGalleryImage5: STEM_GALLERY_IMAGES[4],
-  stemGalleryImage6: STEM_GALLERY_IMAGES[5],
+  stemGalleryImage1: PHOTOS.roboticsProject,
+  stemGalleryImage2: PHOTOS.microscope,
+  stemGalleryImage3: PHOTOS.labPractical,
+  stemGalleryImage4: PHOTOS.roboticsAward,
+  stemGalleryImage5: "",
+  stemGalleryImage6: "",
 
   aboutHistoryParagraph1:
     "Alene High School was founded with a singular purpose: to provide accessible, high-quality education that prepares students for the challenges of a rapidly changing world. Since our founding, we have grown from a small campus into a vibrant learning community serving hundreds of students.",
@@ -119,16 +100,34 @@ const DEFAULT_SETTINGS: SiteSettings = {
   coreValue4Title: "Innovation",
   coreValue4Description: "We embrace creativity and forward-thinking solutions.",
 
-  principalName: "Dr. Meseret Alemu",
+  principalName: "Mr. Abel Hailermariam Meles",
   principalTitle: "Principal, Alene High School",
   principalQuote:
     "At Alene High School, we believe every student holds untapped potential. Our role is to provide the guidance, resources, and environment necessary for that potential to flourish — academically, socially, and personally. We are proud of our students, our dedicated staff, and the community that supports us every step of the way.",
 };
 
 /**
- * Fetches admin-managed site settings, falling back to the static defaults
- * in lib/constants.ts for any key that hasn't been set yet (or if the API
- * is unreachable).
+ * Values written to the database by the original seed script. They were
+ * template placeholders (stock photos, an incorrect address and motto, demo
+ * contact details), so they are treated as "not set" and the defaults above
+ * are used instead. Anything an admin has actually edited is kept.
+ */
+const LEGACY_PLACEHOLDER_VALUES = new Set([
+  "Knowledge. Character. Innovation.",
+  "Alene Sub-City, Addis Ababa, Ethiopia",
+  "+251 11 234 5678",
+  "info@alenehs.edu.et",
+  "Mon - Fri, 8:00 AM - 4:30 PM",
+  "Dr. Meseret Alemu",
+]);
+
+function isLegacyPlaceholder(value: string) {
+  return LEGACY_PLACEHOLDER_VALUES.has(value) || value.startsWith("https://images.unsplash.com/");
+}
+
+/**
+ * Fetches admin-managed site settings, falling back to the defaults above for
+ * any key that hasn't been set yet (or if the API is unreachable).
  */
 export async function fetchSettings(): Promise<SiteSettings> {
   try {
@@ -139,7 +138,8 @@ export async function fetchSettings(): Promise<SiteSettings> {
 
     const merged = { ...DEFAULT_SETTINGS };
     for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof SiteSettings)[]) {
-      if (settings[key]) merged[key] = settings[key];
+      const value = settings[key];
+      if (value && !isLegacyPlaceholder(value)) merged[key] = value;
     }
     return merged;
   } catch {

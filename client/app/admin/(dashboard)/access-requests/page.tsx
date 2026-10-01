@@ -138,12 +138,12 @@ export default function AdminAccessRequestsPage() {
             className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
               autoRefresh
                 ? "border-brand-600 bg-brand-50 text-brand-700"
-                : "border-slate-200 text-ink-600 hover:bg-slate-50"
+                : "border-ink-200 text-ink-600 hover:bg-ink-50"
             }`}
           >
             <span
               className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${
-                autoRefresh ? "bg-brand-600" : "bg-slate-300"
+                autoRefresh ? "bg-brand-600" : "bg-ink-300"
               }`}
             >
               <span
@@ -165,7 +165,7 @@ export default function AdminAccessRequestsPage() {
 
       <div className="card mt-6 overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 text-xs uppercase tracking-wider text-ink-400">
+          <thead className="border-b border-ink-200 text-xs uppercase tracking-wider text-ink-400">
             <tr>
               <th className="px-5 py-3">Name</th>
               <th className="px-5 py-3">Email</th>
@@ -174,7 +174,7 @@ export default function AdminAccessRequestsPage() {
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink-100">
             {loading && (
               <tr>
                 <td colSpan={5} className="px-5 py-8 text-center text-ink-400">

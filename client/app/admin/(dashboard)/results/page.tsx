@@ -124,7 +124,7 @@ export default function AdminResultsPage() {
 
       <div className="card mt-6 overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 text-xs uppercase tracking-wider text-ink-400">
+          <thead className="border-b border-ink-200 text-xs uppercase tracking-wider text-ink-400">
             <tr>
               <th className="px-5 py-3">Registration ID</th>
               <th className="px-5 py-3">Student</th>
@@ -133,7 +133,7 @@ export default function AdminResultsPage() {
               <th className="px-5 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink-100">
             {loading && (
               <tr>
                 <td colSpan={5} className="px-5 py-8 text-center text-ink-400">

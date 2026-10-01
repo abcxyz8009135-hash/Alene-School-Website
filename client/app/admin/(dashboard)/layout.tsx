@@ -85,17 +85,17 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   if (checking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-ink-50">
         <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-ink-50">
       <div className="flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white sm:block">
-          <div className="flex h-16 items-center border-b border-slate-200 px-6">
+        <aside className="hidden w-64 shrink-0 border-r border-ink-200 bg-white sm:block">
+          <div className="flex h-16 items-center border-b border-ink-200 px-6">
             <span className="font-bold text-ink-900">Admin Panel</span>
           </div>
           <nav className="flex flex-col gap-1 p-4">
@@ -108,7 +108,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                   className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                     active
                       ? "bg-brand-50 text-brand-700"
-                      : "text-ink-600 hover:bg-slate-100 hover:text-ink-900"
+                      : "text-ink-600 hover:bg-ink-100 hover:text-ink-900"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -117,12 +117,12 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
               );
             })}
           </nav>
-          <div className="mt-auto border-t border-slate-200 p-4">
+          <div className="mt-auto border-t border-ink-200 p-4">
             <p className="truncate text-xs font-medium text-ink-900">{user?.fullName}</p>
             <p className="truncate text-xs text-ink-400">{user?.email}</p>
             <button
               onClick={handleLogout}
-              className="mt-3 flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-ink-600 transition hover:bg-slate-100"
+              className="mt-3 flex w-full items-center gap-2 rounded-lg border border-ink-200 px-3 py-2 text-xs font-semibold text-ink-600 transition hover:bg-ink-100"
             >
               <LogOut className="h-3.5 w-3.5" />
               Log Out
@@ -131,7 +131,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         </aside>
 
         <div className="flex-1">
-          <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:hidden">
+          <header className="flex h-16 items-center justify-between border-b border-ink-200 bg-white px-4 sm:hidden">
             <span className="font-bold text-ink-900">Admin Panel</span>
             <button
               onClick={handleLogout}
@@ -141,7 +141,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
               Log Out
             </button>
           </header>
-          <nav className="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white p-2 sm:hidden">
+          <nav className="flex gap-1 overflow-x-auto border-b border-ink-200 bg-white p-2 sm:hidden">
             {NAV_ITEMS.map((item) => {
               const active = pathname === item.href;
               return (

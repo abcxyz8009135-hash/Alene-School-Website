@@ -2,66 +2,228 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white font-sans text-ink-900 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
+  }
+
+  /* One consistent, clearly visible focus ring for keyboard users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
-body {
-  @apply bg-white text-ink-900 antialiased;
+/* ------------------------------------------------------------------
+   Layout
+   ------------------------------------------------------------------ */
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-page px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Major section rhythm: 56–80px mobile, 72–100px tablet, 96–128px desktop */
+  .section-y {
+    @apply py-16 sm:py-24 lg:py-32;
+  }
+
+  .section-y-sm {
+    @apply py-14 sm:py-20 lg:py-24;
+  }
+
+  .skip-link {
+    @apply absolute left-4 top-0 z-[60] -translate-y-full rounded-b-md bg-white px-4 py-2 text-sm font-semibold text-brand-700 shadow-card transition focus:translate-y-0;
+  }
+
+  /* ----------------------------------------------------------------
+     Typography
+     ---------------------------------------------------------------- */
+
+  /* Small red uppercase label with a short rule — "ALENE / identity". */
+  .eyebrow {
+    @apply inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-crimson-600;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply block h-px w-8 bg-current;
+  }
+  .eyebrow-light {
+    @apply text-white/80;
+  }
+
+  /* Section number used in the home page narrative (01 — 07). */
+  .section-index {
+    @apply font-display text-sm font-semibold tabular-nums text-ink-400;
+  }
+
+  .display-1 {
+    @apply font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl lg:text-[4.5rem];
+  }
+
+  .display-2 {
+    @apply font-display text-[2rem] font-bold leading-[1.08] tracking-[-0.025em] sm:text-5xl lg:text-[3.25rem];
+  }
+
+  .section-heading {
+    @apply font-display text-3xl font-bold leading-tight tracking-[-0.02em] text-ink-900 sm:text-4xl;
+  }
+
+  .section-subheading {
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-ink-500 sm:text-lg;
+  }
+
+  .lede {
+    @apply text-lg leading-relaxed text-ink-600 sm:text-xl;
+  }
+
+  .prose-body {
+    @apply space-y-5 text-base leading-[1.8] text-ink-600;
+  }
+
+  /* ----------------------------------------------------------------
+     Buttons — moderate radius, subtle hover
+     ---------------------------------------------------------------- */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 text-sm font-semibold tracking-wide transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply btn border border-brand-600 bg-white text-brand-700 hover:bg-brand-50;
+  }
+
+  /* For use on red or photographic backgrounds. */
+  .btn-on-dark {
+    @apply btn border border-white/40 bg-transparent text-white hover:border-white hover:bg-white/10;
+  }
+
+  .btn-sm {
+    @apply px-3.5 py-2 text-xs;
+  }
+
+  .link-arrow {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 underline-offset-4 transition-all hover:gap-2.5 hover:text-brand-700 hover:underline;
+  }
+
+  /* ----------------------------------------------------------------
+     Surfaces
+     ---------------------------------------------------------------- */
+
+  .card {
+    @apply rounded-lg border border-ink-200 bg-white;
+  }
+
+  .tag-pill {
+    @apply inline-flex items-center rounded px-2 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700 ring-1 ring-inset ring-brand-200 bg-brand-50;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-ink-100;
+  }
+
+  /* Image frame with a soft fallback tint while loading / if missing. */
+  .media {
+    @apply relative overflow-hidden bg-ink-100;
+  }
+
+  /* ----------------------------------------------------------------
+     Forms
+     ---------------------------------------------------------------- */
+
+  .input-field {
+    @apply w-full rounded-md border border-ink-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+  }
+
+  .form-label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
+
+  .alert-error {
+    @apply flex items-start gap-2 rounded-md border border-crimson-200 bg-crimson-50 px-4 py-3 text-sm text-crimson-800;
+  }
+
+  .alert-success {
+    @apply flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800;
+  }
+
+  /* ----------------------------------------------------------------
+     Admin helpers (kept for the dashboard)
+     ---------------------------------------------------------------- */
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-crimson-200 bg-crimson-50 px-3 py-1.5 text-xs font-semibold text-crimson-700 transition hover:bg-crimson-100;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-700 transition hover:border-ink-300 hover:bg-ink-50;
+  }
+
+  /* ----------------------------------------------------------------
+     Motifs inspired by the crest's circular geometry
+     ---------------------------------------------------------------- */
+
+  .crest-rings {
+    background-image:
+      radial-gradient(circle at center, transparent 0 38%, currentColor 38% calc(38% + 1px), transparent calc(38% + 1px)),
+      radial-gradient(circle at center, transparent 0 46%, currentColor 46% calc(46% + 1px), transparent calc(46% + 1px)),
+      radial-gradient(circle at center, transparent 0 49.5%, currentColor 49.5% calc(49.5% + 1px), transparent calc(49.5% + 1px));
+  }
 }
 
-::selection {
-  @apply bg-brand-200 text-brand-900;
-}
+/* ------------------------------------------------------------------
+   Scroll reveal — only hides content once JS has confirmed it can show
+   it again (the `js` class is set by an inline script in the layout).
+   ------------------------------------------------------------------ */
 
-.container-page {
-  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
-}
-
-.section {
-  @apply bg-slate-50;
-}
-
-.section-heading {
-  @apply text-3xl sm:text-4xl font-bold tracking-tight text-ink-900;
-}
-
-.section-subheading {
-  @apply mt-3 max-w-2xl text-ink-500;
-}
-
-.card {
-  @apply rounded-2xl border border-slate-200 bg-white shadow-card;
-}
-
-.btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-white;
-}
-
-.btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-ink-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 focus:ring-offset-white;
-}
-
-.tag-pill {
-  @apply inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200;
-}
-
-.skeleton {
-  @apply animate-pulse bg-slate-200;
-}
-
-.input-field {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500;
-}
-
-.form-label {
-  @apply mb-1.5 block text-sm font-medium text-ink-700;
-}
-
-.btn-danger {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100;
-}
-
-.btn-icon {
-  @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-700 transition hover:border-slate-300 hover:bg-slate-50;
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .js .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
 }

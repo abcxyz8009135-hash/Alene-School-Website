@@ -29,38 +29,35 @@ const SECTIONS: Section[] = [
         key: "schoolMotto",
         label: "School Motto",
         type: "text",
-        placeholder: "Knowledge. Character. Innovation.",
+        placeholder: "Excellence in science through collective effort",
       },
       { key: "logoUrl", label: "Logo", type: "image" },
     ],
   },
   {
-    title: "Home Page Hero Carousel",
-    description: "The rotating banner at the top of the home page.",
+    title: "Home Page Images",
+    description:
+      "Photographs used on the home page. Leave a field empty to use the default school photo.",
     fields: [
-      { key: "heroSlide1Image", label: "Slide 1 Image", type: "image" },
-      { key: "heroSlide1Title", label: "Slide 1 Title", type: "text" },
-      { key: "heroSlide1Subtitle", label: "Slide 1 Subtitle", type: "textarea" },
-      { key: "heroSlide2Image", label: "Slide 2 Image", type: "image" },
-      { key: "heroSlide2Title", label: "Slide 2 Title", type: "text" },
-      { key: "heroSlide2Subtitle", label: "Slide 2 Subtitle", type: "textarea" },
-      { key: "heroSlide3Image", label: "Slide 3 Image", type: "image" },
-      { key: "heroSlide3Title", label: "Slide 3 Title", type: "text" },
-      { key: "heroSlide3Subtitle", label: "Slide 3 Subtitle", type: "textarea" },
+      { key: "homeHeroImage", label: "Hero — main photograph", type: "image" },
+      { key: "homeAcademicsImage", label: "Academics section", type: "image" },
+      { key: "homeStemImage", label: "STEM section — large photograph", type: "image" },
+      { key: "homeAchievementImage", label: "Student achievements — featured photograph", type: "image" },
+      { key: "homeCommunityImage1", label: "Community — main photograph", type: "image" },
+      { key: "homeCommunityImage2", label: "Community — second photograph", type: "image" },
     ],
   },
   {
-    title: "Page Hero Images",
+    title: "Page Header Images",
     fields: [
-      { key: "homeStemImage", label: "Home Page — STEM Showcase Image", type: "image" },
-      { key: "aboutHeroImage", label: "About Us — Hero Image", type: "image" },
-      { key: "hobbiesHeroImage", label: "Hobbies — Hero Image", type: "image" },
-      { key: "stemHeroImage", label: "STEM Center — Hero Image", type: "image" },
+      { key: "aboutHeroImage", label: "About — header image", type: "image" },
+      { key: "stemHeroImage", label: "STEM — science photograph (also used on Home and Academics)", type: "image" },
+      { key: "hobbiesHeroImage", label: "Community — header image", type: "image" },
     ],
   },
   {
     title: "STEM Center Gallery",
-    description: "Six images shown in the STEM Center lab & robotics gallery.",
+    description: "Up to six images shown in the STEM page gallery. Empty slots are hidden.",
     fields: [
       { key: "stemGalleryImage1", label: "Gallery Image 1", type: "image" },
       { key: "stemGalleryImage2", label: "Gallery Image 2", type: "image" },
@@ -273,7 +270,7 @@ export default function AdminContentPage() {
                             <img
                               src={values[field.key]}
                               alt={field.label}
-                              className="h-10 w-10 rounded-lg object-cover ring-1 ring-inset ring-slate-200"
+                              className="h-10 w-10 rounded-lg object-cover ring-1 ring-inset ring-ink-200"
                             />
                           )}
                           <input

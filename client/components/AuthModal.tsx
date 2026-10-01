@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useRef, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/constants";
@@ -28,6 +28,53 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // Kept in a ref so a new onClose identity from the parent doesn't re-run
+  // the effect below (which would steal focus on every parent render).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Close on Escape, keep focus inside the dialog, and lock page scroll.
+  useEffect(() => {
+    if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusable = () =>
+      Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          "button:not([disabled]), input:not([disabled]), a[href]"
+        ) ?? []
+      );
+    dialogRef.current?.querySelector<HTMLInputElement>("input")?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -107,21 +154,29 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div
-        className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm"
+        className="absolute inset-0 animate-fade-in bg-ink-950/60"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-card sm:p-8">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+        className="relative max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-lg border-t-4 border-crimson-600 bg-white p-6 shadow-card sm:p-8"
+      >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-ink-400 transition hover:bg-slate-100 hover:text-ink-900"
+          type="button"
+          className="absolute right-4 top-4 rounded-md p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-900"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
         </button>
 
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-ink-900">
+          <p className="eyebrow">Alene portal</p>
+          <h2 id="auth-modal-title" className="mt-3 text-xl font-bold text-ink-900">
             {mode === "login" ? "Log in to Portal" : "Request Portal Access"}
           </h2>
           <p className="mt-1 text-sm text-ink-500">
@@ -131,21 +186,25 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
           </p>
         </div>
 
-        <div className="mb-6 flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+        <div className="mb-6 flex rounded-md border border-ink-200 bg-ink-50 p-1" role="group" aria-label="Portal action">
           <button
-            className={`flex-1 rounded-md py-2 text-sm font-semibold transition ${
+            type="button"
+            className={`flex-1 rounded py-2 text-sm font-semibold transition ${
               mode === "login" ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
             }`}
+            aria-pressed={mode === "login"}
             onClick={() => switchMode("login")}
           >
             Log In
           </button>
           <button
-            className={`flex-1 rounded-md py-2 text-sm font-semibold transition ${
+            type="button"
+            className={`flex-1 rounded py-2 text-sm font-semibold transition ${
               mode === "request-access"
                 ? "bg-brand-600 text-white"
                 : "text-ink-500 hover:text-ink-900"
             }`}
+            aria-pressed={mode === "request-access"}
             onClick={() => switchMode("request-access")}
           >
             Request Portal Access
@@ -157,17 +216,18 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
           className="space-y-4"
         >
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-700">I am a</label>
-            <div className="flex gap-2">
+            <p id="auth-role-label" className="form-label">I am a</p>
+            <div className="flex gap-2" role="group" aria-labelledby="auth-role-label">
               {ROLE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setRole(option.value)}
-                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                  aria-pressed={role === option.value}
+                  className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
                     role === option.value
                       ? "border-brand-600 bg-brand-50 text-brand-700"
-                      : "border-slate-300 text-ink-600 hover:bg-slate-50"
+                      : "border-ink-300 text-ink-600 hover:bg-ink-50"
                   }`}
                 >
                   {option.label}
@@ -178,52 +238,58 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
 
           {mode === "request-access" && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
+              <label htmlFor="auth-full-name" className="form-label">
                 Full Name
               </label>
               <input
+                id="auth-full-name"
+                autoComplete="name"
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                className="input-field"
                 placeholder="Your full name"
               />
             </div>
           )}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-ink-700">Email</label>
+            <label htmlFor="auth-email" className="form-label">Email</label>
             <input
+              id="auth-email"
+              autoComplete="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className="input-field"
               placeholder="you@example.com"
             />
           </div>
           {mode === "login" && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">Password</label>
+              <label htmlFor="auth-password" className="form-label">Password</label>
               <input
+                id="auth-password"
+                autoComplete="current-password"
                 type="password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                className="input-field"
                 placeholder="••••••••"
               />
             </div>
           )}
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-inset ring-red-200">
+            <p role="alert" className="alert-error">
               {error}
             </p>
           )}
           {success && (
-            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600 ring-1 ring-inset ring-emerald-200">
+            <p role="status" className="alert-success">
               {success}
             </p>
           )}

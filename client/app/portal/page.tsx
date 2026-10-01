@@ -43,18 +43,18 @@ export default function PortalPage() {
   if (checking) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-brand-600" aria-label="Loading" />
       </div>
     );
   }
 
   return (
     <section className="container-page flex min-h-[60vh] items-center justify-center py-16">
-      <div className="card flex max-w-md flex-col items-center gap-3 px-8 py-12 text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-200">
-          <GraduationCap className="h-6 w-6" />
+      <div className="flex max-w-md flex-col items-center gap-3 rounded-sm border border-ink-200 border-t-4 border-t-crimson-600 bg-white px-8 py-12 text-center shadow-card">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-200">
+          <GraduationCap className="h-6 w-6" aria-hidden="true" />
         </span>
-        <h1 className="text-2xl font-bold text-ink-900">Welcome, {user?.fullName}</h1>
+        <h1 className="font-display text-2xl font-bold text-ink-900">Welcome, {user?.fullName}</h1>
         <p className="text-sm text-ink-500">
           You&apos;re signed in as a {user ? ROLE_LABELS[user.role] ?? user.role : ""}. Portal
           features for your role are on the way.

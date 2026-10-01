@@ -29,51 +29,57 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-ink-700">Name</label>
+          <label htmlFor="contact-name" className="form-label">Name</label>
           <input
+            id="contact-name"
+            autoComplete="name"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="input-field"
             placeholder="Your full name"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-ink-700">Email</label>
+          <label htmlFor="contact-email" className="form-label">Email</label>
           <input
+            id="contact-email"
+            autoComplete="email"
             required
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="input-field"
             placeholder="you@example.com"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-ink-700">Subject</label>
+        <label htmlFor="contact-subject" className="form-label">Subject</label>
         <input
+          id="contact-subject"
           required
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="input-field"
           placeholder="How can we help?"
         />
       </div>
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-ink-700">Message</label>
+        <label htmlFor="contact-message" className="form-label">Message</label>
         <textarea
+          id="contact-message"
           required
           rows={5}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+          className="input-field resize-y"
           placeholder="Write your message..."
         />
       </div>
 
       {sent && (
-        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600 ring-1 ring-inset ring-emerald-200">
+        <p role="status" className="alert-success">
           Thank you! Your message has been sent — we&apos;ll respond shortly.
         </p>
       )}

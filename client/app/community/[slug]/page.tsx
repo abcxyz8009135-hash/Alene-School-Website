@@ -17,12 +17,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const program = await fetchProgramBySlug("hobbies", params.slug);
   return {
-    title: program ? `${program.title} — Hobbies & Co-Curriculars` : "Hobbies Program",
+    title: program ? `${program.title} — Community` : "Community Program",
     description: program?.summary,
   };
 }
 
-export default async function HobbiesProgramDetailPage({ params }: PageProps) {
+export default async function CommunityProgramDetailPage({ params }: PageProps) {
   const program = await fetchProgramBySlug("hobbies", params.slug);
   if (!program) notFound();
 

@@ -1,29 +1,36 @@
-import Image from "next/image";
-import { Lightbulb, Microscope, Rocket } from "lucide-react";
+import type { Metadata } from "next";
 import ProgramCard from "@/components/ProgramCard";
+import PageHeader from "@/components/PageHeader";
+import Photo from "@/components/Photo";
+import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import { STEM_COPY } from "@/lib/content";
 import { fetchProgramsByCategory } from "@/lib/programs";
 import { fetchSettings } from "@/lib/settings";
 
-const PROGRAM_FEATURES = [
+export const metadata: Metadata = {
+  title: "STEM",
+  description:
+    "STEM at Alene High School, Mekelle: robotics, practical laboratory science and technology, learned by building, testing and presenting.",
+};
+
+const APPROACH = [
   {
-    icon: Microscope,
-    title: "Research Projects",
-    desc: "Guided independent research projects that build critical scientific thinking.",
+    title: "Research projects",
+    body: "Guided projects that build careful, critical scientific thinking.",
   },
   {
-    icon: Rocket,
-    title: "Innovation Challenges",
-    desc: "Termly innovation challenges encouraging creative problem-solving.",
+    title: "Build and test",
+    body: "Students design something, try it, see where it fails and improve it.",
   },
   {
-    icon: Lightbulb,
-    title: "Mentorship Program",
-    desc: "Industry professionals mentor students on real-world STEM applications.",
+    title: "Present the work",
+    body: "Projects are explained to judges, teachers and peers — at school and at competitions.",
   },
 ];
 
 export default async function StemCenterPage() {
-  const [STEM_PROGRAMS, settings] = await Promise.all([
+  const [programs, settings] = await Promise.all([
     fetchProgramsByCategory("stem-center"),
     fetchSettings(),
   ]);
@@ -35,94 +42,96 @@ export default async function StemCenterPage() {
     settings.stemGalleryImage4,
     settings.stemGalleryImage5,
     settings.stemGalleryImage6,
-  ];
+  ].filter(Boolean);
 
   return (
     <>
-      <section className="border-b border-slate-200 bg-slate-50 py-16">
-        <div className="container-page">
-          <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
-            Science &amp; Technology, Reimagined
-          </h1>
-          <p className="mt-4 max-w-2xl text-ink-500">
-            Our state-of-the-art STEM Center equips students with the tools,
-            mentorship, and lab space to explore web development, robotics,
-            and applied sciences at the highest level.
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow={STEM_COPY.eyebrow}
+        title={
+          <>
+            {STEM_COPY.headline}
+            <span className="block text-brand-600">{STEM_COPY.headlineAccent}</span>
+          </>
+        }
+        intro={STEM_COPY.body}
+        image={settings.homeStemImage}
+        imageAlt="Alene students presenting a fish-farming robot they built"
+      />
 
-      {/* Program cards */}
-      <section className="container-page py-16">
-        <h2 className="section-heading">Explore Our Programs</h2>
-        <p className="section-subheading">
-          Select a program to see its curriculum and achievements.
-        </p>
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {STEM_PROGRAMS.map((program) => (
-            <ProgramCard
-              key={program.slug}
-              title={program.title}
-              description={program.summary}
-              imageSrc={program.imageSrc}
-              slug={program.slug}
-              category={program.category}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Program features */}
-      <section className="bg-slate-50 py-16">
+      {/* Programs */}
+      <section aria-labelledby="programs-title" className="section-y-sm border-t border-ink-200">
         <div className="container-page">
-          <h2 className="section-heading">Why Our STEM Center</h2>
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {PROGRAM_FEATURES.map((feature) => (
-              <div key={feature.title} className="card p-6">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-inset ring-brand-200">
-                  <feature.icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 font-semibold text-ink-900">{feature.title}</h3>
-                <p className="mt-2 text-sm text-ink-500">{feature.desc}</p>
-              </div>
+          <SectionHeading
+            eyebrow="Programs"
+            title={<span id="programs-title">Where students explore.</span>}
+            intro="Choose a program to see what students do and what they have achieved."
+          />
+          <ul className="mt-12 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {programs.map((program, i) => (
+              <Reveal as="li" key={program.slug} delay={i * 80}>
+                <ProgramCard
+                  index={i + 1}
+                  title={program.title}
+                  description={program.summary}
+                  imageSrc={program.imageSrc}
+                  slug={program.slug}
+                  category={program.category}
+                />
+              </Reveal>
             ))}
-          </div>
+          </ul>
+        </div>
+      </section>
+
+      {/* Approach */}
+      <section aria-labelledby="approach-title" className="section-y-sm bg-brand-900 text-white">
+        <div className="container-page">
+          <SectionHeading
+            tone="light"
+            eyebrow="How STEM works here"
+            title={<span id="approach-title">Curiosity, then evidence.</span>}
+          />
+          <ol className="mt-12 grid grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-8">
+            {APPROACH.map((item, i) => (
+              <Reveal as="li" key={item.title} delay={i * 100} className="border-t border-white/20 py-7">
+                <span className="font-display text-5xl font-extrabold tabular-nums text-white/25">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="mt-5 font-display text-xl font-extrabold uppercase tracking-[0.08em]">
+                  {item.title}
+                </h3>
+                <p className="mt-2 max-w-xs leading-relaxed text-white/70">{item.body}</p>
+              </Reveal>
+            ))}
+          </ol>
         </div>
       </section>
 
       {/* Gallery */}
-      <section className="container-page py-16">
-        <h2 className="section-heading">Lab &amp; Robotics Gallery</h2>
-        <p className="section-subheading">
-          A glimpse into our science, web, and robotics facilities.
-        </p>
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {galleryImages.map((src, i) => (
-            <div
-              key={i}
-              className={`relative overflow-hidden rounded-xl border border-slate-200 ${
-                i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto" : "aspect-square"
-              }`}
-            >
-              <div className="skeleton absolute inset-0" />
-              <Image
-                src={src}
-                alt={`STEM Center gallery image ${i + 1}`}
-                fill
-                className="object-cover transition duration-500 hover:scale-105"
-              />
+      {galleryImages.length > 0 && (
+        <section aria-labelledby="gallery-title" className="section-y-sm">
+          <div className="container-page">
+            <SectionHeading eyebrow="Gallery" title={<span id="gallery-title">In the lab and the workshop.</span>} />
+            <div className="mt-12 grid auto-rows-[150px] grid-cols-2 gap-3 sm:auto-rows-[220px] sm:gap-4 lg:grid-cols-4">
+              {galleryImages.map((src, i) => (
+                <Reveal
+                  key={`${src}-${i}`}
+                  delay={(i % 4) * 60}
+                  className={i === 0 ? "col-span-2 row-span-2 h-full" : "h-full"}
+                >
+                  <Photo
+                    src={src}
+                    alt={`STEM at Alene, photo ${i + 1}`}
+                    sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"}
+                    className="h-full w-full rounded-sm"
+                  />
+                </Reveal>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Hero showcase image */}
-      <section className="container-page pb-20">
-        <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-slate-200 sm:h-80">
-          <div className="skeleton absolute inset-0" />
-          <Image src={settings.stemHeroImage} alt="STEM Center facilities" fill className="object-cover" />
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </>
   );
 }

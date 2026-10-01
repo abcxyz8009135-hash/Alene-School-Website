@@ -234,46 +234,15 @@ async function main() {
   const defaultSettings: Record<string, string> = {
     schoolName: "Alene High School",
     schoolShortName: "Alene HS",
-    schoolMotto: "Knowledge. Character. Innovation.",
-    contactAddress: "Alene Sub-City, Addis Ababa, Ethiopia",
-    contactPhone: "+251 11 234 5678",
-    contactEmail: "info@alenehs.edu.et",
-    contactHours: "Mon - Fri, 8:00 AM - 4:30 PM",
+    schoolMotto: "Excellence in science through collective effort",
+    contactAddress: "Semen Sub-City, Mekelle, Ethiopia",
+    contactPhone: "+251971190170",
+    contactEmail: "registrar@alene.edu.et",
+    contactHours: "",
 
-    heroSlide1Image:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1920&q=80",
-    heroSlide1Title: "Welcome to Alene High School",
-    heroSlide1Subtitle: "Shaping tomorrow's leaders through excellence in education.",
-    heroSlide2Image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80",
-    heroSlide2Title: "Innovation Through Science & Technology",
-    heroSlide2Subtitle: "Our STEM Center empowers students to build, explore, and invent.",
-    heroSlide3Image:
-      "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1920&q=80",
-    heroSlide3Title: "A Community of Achievers",
-    heroSlide3Subtitle: "Academics, arts, and athletics — a well-rounded student experience.",
-
-    homeStemImage:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
-    aboutHeroImage:
-      "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1600&q=80",
-    hobbiesHeroImage:
-      "https://images.unsplash.com/photo-1526676037777-05a232554f77?auto=format&fit=crop&w=1600&q=80",
-    stemHeroImage:
-      "https://images.unsplash.com/photo-1581091870621-1e9b6b3f5c8b?auto=format&fit=crop&w=1600&q=80",
-
-    stemGalleryImage1:
-      "https://images.unsplash.com/photo-1581091870621-1e9b6b3f5c8b?auto=format&fit=crop&w=800&q=80",
-    stemGalleryImage2:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-    stemGalleryImage3:
-      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-    stemGalleryImage4:
-      "https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=800&q=80",
-    stemGalleryImage5:
-      "https://images.unsplash.com/photo-1614064548237-096d9b32c5ba?auto=format&fit=crop&w=800&q=80",
-    stemGalleryImage6:
-      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
+    // Page images are intentionally not seeded: the client falls back to the
+    // school's own photographs in client/public/images until an admin uploads
+    // replacements from the Site Content dashboard.
 
     aboutHistoryParagraph1:
       "Alene High School was founded with a singular purpose: to provide accessible, high-quality education that prepares students for the challenges of a rapidly changing world. Since our founding, we have grown from a small campus into a vibrant learning community serving hundreds of students.",
@@ -293,7 +262,7 @@ async function main() {
     coreValue4Title: "Innovation",
     coreValue4Description: "We embrace creativity and forward-thinking solutions.",
 
-    principalName: "Dr. Meseret Alemu",
+    principalName: "Mr. Abel Hailermariam Meles",
     principalTitle: "Principal, Alene High School",
     principalQuote:
       "At Alene High School, we believe every student holds untapped potential. Our role is to provide the guidance, resources, and environment necessary for that potential to flourish — academically, socially, and personally. We are proud of our students, our dedicated staff, and the community that supports us every step of the way.",

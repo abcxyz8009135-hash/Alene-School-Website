@@ -1,71 +1,74 @@
+import type { Metadata } from "next";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
-import { CONTACT_INFO } from "@/lib/constants";
+import PageHeader from "@/components/PageHeader";
+import { fetchSettings } from "@/lib/settings";
 
-// Hybrid rendering: this shell (contact details, layout) is static SSG;
-// the interactive form is isolated in the client-rendered <ContactForm />.
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Contact Alene High School in Semen Sub-City, Mekelle, Ethiopia.",
+};
 
-export default function ContactUsPage() {
+export default async function ContactUsPage() {
+  const settings = await fetchSettings();
+
+  const details = [
+    { icon: MapPin, label: "Address", value: settings.contactAddress },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: settings.contactPhone,
+      href: `tel:${settings.contactPhone.replace(/\s/g, "")}`,
+    },
+    { icon: Mail, label: "Email", value: settings.contactEmail, href: `mailto:${settings.contactEmail}` },
+    { icon: Clock, label: "Office hours", value: settings.contactHours },
+  ].filter((d) => d.value);
+
   return (
-    <section className="container-page py-16">
-      <h1 className="mt-4 text-4xl font-bold text-ink-900 sm:text-5xl">
-        Get in Touch
-      </h1>
-      <p className="mt-4 max-w-2xl text-ink-500">
-        Have a question about admissions, academics, or campus life? We&apos;d
-        love to hear from you.
-      </p>
+    <>
+      <PageHeader
+        eyebrow="Contact"
+        title="Get in touch."
+        intro="Questions about admissions, academics or school life? Send us a message or reach the registrar directly."
+      />
 
-      <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-5">
-        {/* Contact form (client component) */}
-        <div className="card p-6 lg:col-span-3 sm:p-8">
-          <ContactForm />
-        </div>
-
-        {/* Contact info + map (static) */}
-        <div className="space-y-6 lg:col-span-2">
-          <div className="card space-y-5 p-6 sm:p-8">
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
-              <div>
-                <h4 className="text-sm font-semibold text-ink-900">Address</h4>
-                <p className="text-sm text-ink-500">{CONTACT_INFO.address}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
-              <div>
-                <h4 className="text-sm font-semibold text-ink-900">Phone</h4>
-                <p className="text-sm text-ink-500">{CONTACT_INFO.phone}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
-              <div>
-                <h4 className="text-sm font-semibold text-ink-900">Email</h4>
-                <p className="text-sm text-ink-500">{CONTACT_INFO.email}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Clock className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
-              <div>
-                <h4 className="text-sm font-semibold text-ink-900">Office Hours</h4>
-                <p className="text-sm text-ink-500">{CONTACT_INFO.hours}</p>
-              </div>
+      <section className="border-t border-ink-200 pb-16 sm:pb-24 lg:pb-32">
+        <div className="container-page grid grid-cols-1 gap-14 pt-12 lg:grid-cols-12 lg:gap-16 lg:pt-16">
+          <div className="lg:col-span-7">
+            <h2 className="font-display text-2xl font-bold text-ink-900">Send a message</h2>
+            <div className="mt-8">
+              <ContactForm />
             </div>
           </div>
 
-          {/* Map placeholder */}
-          <div className="card relative flex h-56 items-center justify-center overflow-hidden bg-slate-50">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.08),transparent_70%)]" />
-            <div className="relative flex flex-col items-center gap-2 text-center">
-              <MapPin className="h-8 w-8 text-brand-500" />
-              <p className="text-sm text-ink-500">Map preview unavailable</p>
-              <p className="text-xs text-ink-400">{CONTACT_INFO.address}</p>
+          <aside className="lg:col-span-5" aria-labelledby="contact-details-title">
+            <div className="border-t-4 border-crimson-600 bg-ink-50 p-6 sm:p-8">
+              <h2 id="contact-details-title" className="font-display text-2xl font-bold text-ink-900">
+                {settings.schoolName}
+              </h2>
+              <dl className="mt-6 divide-y divide-ink-200">
+                {details.map(({ icon: Icon, label, value, href }) => (
+                  <div key={label} className="flex items-start gap-4 py-5">
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" />
+                    <div>
+                      <dt className="text-xs font-bold uppercase tracking-[0.14em] text-ink-500">{label}</dt>
+                      <dd className="mt-1 text-ink-900">
+                        {href ? (
+                          <a href={href} className="break-all font-medium hover:text-brand-700 hover:underline">
+                            {value}
+                          </a>
+                        ) : (
+                          value
+                        )}
+                      </dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
             </div>
-          </div>
+          </aside>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

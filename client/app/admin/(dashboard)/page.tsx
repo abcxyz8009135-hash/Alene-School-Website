@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
           <p className="mt-1 text-xs text-ink-400">
             {stats.passCount} of {stats.resultsCount} results marked as passed
           </p>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-ink-200">
             <div
               className="h-full rounded-full bg-brand-600"
               style={{

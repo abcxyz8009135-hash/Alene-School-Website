@@ -1,8 +1,26 @@
+import type { Metadata } from "next";
 import Image from "next/image";
-import { BookOpen, Compass, HeartHandshake, ShieldCheck, Sparkles, Target } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+import Reveal from "@/components/Reveal";
+import SectionHeading from "@/components/SectionHeading";
+import ExamResultsCTA from "@/components/ExamResultsCTA";
 import { fetchSettings } from "@/lib/settings";
 
-const CORE_VALUE_ICONS = [BookOpen, ShieldCheck, HeartHandshake, Sparkles];
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "The story, mission and values of Alene High School, a public high school in Semen Sub-City, Mekelle.",
+};
+
+function initials(name: string) {
+  return name
+    .replace(/^(mr|mrs|ms|dr)\.?\s+/i, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 export default async function AboutUsPage() {
   const settings = await fetchSettings();
@@ -12,88 +30,141 @@ export default async function AboutUsPage() {
     { title: settings.coreValue2Title, desc: settings.coreValue2Description },
     { title: settings.coreValue3Title, desc: settings.coreValue3Description },
     { title: settings.coreValue4Title, desc: settings.coreValue4Description },
-  ];
+  ].filter((v) => v.title);
 
   return (
     <>
-      <section className="relative flex h-[38vh] min-h-[280px] items-end overflow-hidden">
-        <div className="skeleton absolute inset-0" />
-        <Image
-          src={settings.aboutHeroImage}
-          alt="Alene High School campus"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/40 to-ink-950/10" />
-        <div className="container-page relative pb-10">
-          <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
-            Our Story, Our Purpose
-          </h1>
-        </div>
-      </section>
+      <PageHeader
+        eyebrow="About Alene"
+        title={
+          <>
+            A public school with
+            <span className="block text-brand-600">a science-first spirit.</span>
+          </>
+        }
+        intro={`${settings.schoolName} serves students in Semen Sub-City, Mekelle. Our motto — “${settings.schoolMotto}” — shapes how we teach, learn and work together.`}
+        image={settings.aboutHeroImage}
+        imageAlt="Alene students gathered for morning assembly in the school courtyard"
+      />
 
       {/* History */}
-      <section className="container-page py-16">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <h2 className="section-heading">Our History</h2>
+      <section aria-labelledby="history-title" className="section-y-sm border-t border-ink-200">
+        <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <p className="eyebrow">Our history</p>
+            <h2 id="history-title" className="section-heading mt-5">
+              Where we come from.
+            </h2>
           </div>
-          <div className="lg:col-span-2 space-y-4 text-ink-500 leading-relaxed">
+          <Reveal className="prose-body lg:col-span-7 lg:col-start-6 lg:text-lg">
             <p>{settings.aboutHistoryParagraph1}</p>
             <p>{settings.aboutHistoryParagraph2}</p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Mission / Vision */}
-      <section className="bg-slate-50 py-16">
-        <div className="container-page grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="card p-8">
-            <Target className="h-8 w-8 text-brand-600" />
-            <h3 className="mt-4 text-xl font-bold text-ink-900">Mission</h3>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500">{settings.aboutMission}</p>
-          </div>
-          <div className="card p-8">
-            <Compass className="h-8 w-8 text-brand-600" />
-            <h3 className="mt-4 text-xl font-bold text-ink-900">Vision</h3>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500">{settings.aboutVision}</p>
-          </div>
+      {/* Mission & vision */}
+      <section aria-label="Mission and vision" className="bg-brand-900 text-white">
+        <div className="container-page grid grid-cols-1 divide-y divide-white/15 md:grid-cols-2 md:divide-x md:divide-y-0">
+          {[
+            { label: "Mission", text: settings.aboutMission },
+            { label: "Vision", text: settings.aboutVision },
+          ].map((item, i) => (
+            <Reveal key={item.label} delay={i * 100} className={`py-14 sm:py-20 ${i === 0 ? "md:pr-12" : "md:pl-12"}`}>
+              <p className="eyebrow eyebrow-light">{item.label}</p>
+              <p className="mt-6 font-display text-2xl font-semibold leading-snug sm:text-[1.7rem]">{item.text}</p>
+            </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* Core Values */}
-      <section className="container-page py-16">
-        <h2 className="section-heading">Core Values</h2>
-        <p className="section-subheading">The principles that guide everything we do.</p>
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {coreValues.map((value, i) => {
-            const Icon = CORE_VALUE_ICONS[i];
-            return (
-              <div key={value.title} className="card p-6">
-                <Icon className="h-7 w-7 text-brand-600" />
-                <h4 className="mt-4 font-semibold text-ink-900">{value.title}</h4>
-                <p className="mt-2 text-sm text-ink-500">{value.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      {/* Core values */}
+      {coreValues.length > 0 && (
+        <section aria-labelledby="values-title" className="section-y-sm">
+          <div className="container-page">
+            <SectionHeading
+              eyebrow="Core values"
+              title={<span id="values-title">The principles behind the work.</span>}
+            />
+            <ol className="mt-12 grid grid-cols-1 gap-y-10 sm:grid-cols-2 sm:gap-x-10 lg:grid-cols-4">
+              {coreValues.map((value, i) => (
+                <Reveal as="li" key={value.title} delay={i * 80} className="border-t-2 border-crimson-600 pt-6">
+                  <span className="font-display text-sm font-semibold tabular-nums text-crimson-600">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-3 font-display text-xl font-bold text-ink-900">{value.title}</h3>
+                  <p className="mt-2 leading-relaxed text-ink-600">{value.desc}</p>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
 
-      {/* Principal's Message */}
-      <section className="container-page pb-20">
-        <div className="card grid grid-cols-1 gap-8 bg-slate-50 p-8 sm:grid-cols-[auto_1fr] sm:p-10">
-          <div className="mx-auto h-28 w-28 shrink-0 rounded-full bg-gradient-to-br from-brand-500 to-brand-800 ring-4 ring-white sm:mx-0" />
-          <div>
-            <span className="tag-pill">Principal&apos;s Message</span>
-            <p className="mt-4 italic leading-relaxed text-ink-700">
-              &ldquo;{settings.principalQuote}&rdquo;
+      {/* The crest */}
+      <section aria-labelledby="crest-title" className="section-y-sm bg-ink-50">
+        <div className="container-page grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+          <Reveal className="mx-auto w-full max-w-xs lg:col-span-4 lg:max-w-none">
+            <div className="relative mx-auto aspect-square w-full max-w-[340px] overflow-hidden rounded-full bg-white p-2 ring-1 ring-ink-200">
+              <Image
+                src={settings.logoUrl}
+                alt="The official crest of Alene High School"
+                width={680}
+                height={680}
+                className="h-full w-full rounded-full object-cover"
+              />
+            </div>
+          </Reveal>
+          <div className="lg:col-span-7 lg:col-start-6">
+            <p className="eyebrow">Our crest</p>
+            <h2 id="crest-title" className="section-heading mt-5">
+              Semen Sub-City Alene High School.
+            </h2>
+            <p className="prose-body mt-6">
+              The school crest carries our name in Ge&apos;ez script and in English, together with
+              the Mekelle Administration Office. At its centre sit a balanced pair of scales and an
+              upward arrow, framed by a gear — the same circular geometry you will see echoed
+              across this site.
             </p>
-            <p className="mt-4 text-sm font-semibold text-ink-900">{settings.principalName}</p>
-            <p className="text-xs text-ink-400">{settings.principalTitle}</p>
           </div>
         </div>
       </section>
+
+      {/* Principal's message */}
+      <section aria-labelledby="principal-title" className="section-y-sm">
+        <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <p className="eyebrow">Principal&apos;s message</p>
+            <div className="mt-8 flex items-center gap-4">
+              <span
+                aria-hidden="true"
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-crimson-600 font-display text-xl font-extrabold text-white"
+              >
+                {initials(settings.principalName)}
+              </span>
+              <div>
+                <h2 id="principal-title" className="font-display text-lg font-bold text-ink-900">
+                  {settings.principalName}
+                </h2>
+                <p className="text-sm text-ink-500">{settings.principalTitle}</p>
+              </div>
+            </div>
+          </div>
+          <Reveal as="blockquote" className="lg:col-span-8">
+            <p className="font-display text-2xl font-semibold leading-[1.45] text-ink-900 sm:text-3xl">
+              <span className="text-brand-600" aria-hidden="true">
+                &ldquo;
+              </span>
+              {settings.principalQuote}
+              <span className="text-brand-600" aria-hidden="true">
+                &rdquo;
+              </span>
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <ExamResultsCTA />
     </>
   );
 }
