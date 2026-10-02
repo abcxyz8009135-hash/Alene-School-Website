@@ -97,6 +97,9 @@ async function main() {
     skipDuplicates: true,
   });
 
+  // Achievements have no natural unique key, so skipDuplicates can't stop a
+  // re-run from inserting copies; only seed them into an empty table.
+  if ((await prisma.programAchievement.count()) === 0) {
   await prisma.programAchievement.createMany({
     data: [
       {
@@ -218,6 +221,7 @@ async function main() {
     ],
     skipDuplicates: true,
   });
+  }
 
   const hashed = await bcrypt.hash("password123", 10);
   await prisma.user.upsert({
