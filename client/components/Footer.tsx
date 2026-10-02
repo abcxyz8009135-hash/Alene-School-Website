@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import Logo from "./Logo";
-import { FOOTER_LINKS } from "@/lib/constants";
+import type { SiteContent, SiteNavigation } from "@/lib/content";
 import type { SiteSettings } from "@/lib/settings";
 
 interface FooterProps {
   settings: SiteSettings;
+  nav: SiteNavigation;
+  content: SiteContent;
 }
 
-export default function Footer({ settings }: FooterProps) {
+export default function Footer({ settings, nav, content: c }: FooterProps) {
   const year = new Date().getFullYear();
   const socialLinks = [
     { Icon: Facebook, href: settings.facebookUrl, label: "Facebook" },
@@ -32,22 +34,24 @@ export default function Footer({ settings }: FooterProps) {
               schoolName={settings.schoolName}
               tone="light"
               size="lg"
-              showLocation
+              locationLine={c.text("brand.locationLine")}
             />
             <blockquote className="mt-8 max-w-md">
               <p className="font-display text-2xl font-bold leading-snug tracking-tight sm:text-[1.7rem]">
                 &ldquo;{settings.schoolMotto}&rdquo;
               </p>
               <footer className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-                School motto
+                {c.text("footer.mottoLabel")}
               </footer>
             </blockquote>
           </div>
 
           <nav aria-label="Footer" className="lg:col-span-3">
-            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Explore</h2>
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">
+              {c.text("footer.exploreHeading")}
+            </h2>
             <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 lg:grid-cols-1">
-              {FOOTER_LINKS.map((link) => (
+              {nav.footer.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -61,7 +65,9 @@ export default function Footer({ settings }: FooterProps) {
           </nav>
 
           <div className="lg:col-span-4">
-            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">Visit &amp; contact</h2>
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">
+              {c.text("footer.contactHeading")}
+            </h2>
             <ul className="mt-5 space-y-4 text-sm text-white/85">
               {settings.contactAddress && (
                 <li className="flex items-start gap-3">
@@ -117,7 +123,7 @@ export default function Footer({ settings }: FooterProps) {
           <p>
             © {year} {settings.schoolName}. All rights reserved.
           </p>
-          <p>Mekelle Administration Office · Semen Sub-City</p>
+          <p>{c.text("footer.bottomLine")}</p>
         </div>
       </div>
     </footer>

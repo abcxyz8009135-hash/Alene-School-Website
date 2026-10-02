@@ -4,35 +4,20 @@ import PageHeader from "@/components/PageHeader";
 import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import { STEM_COPY } from "@/lib/content";
+import { getContent } from "@/lib/content";
 import { fetchProgramsByCategory } from "@/lib/programs";
 import { fetchSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "STEM",
-  description:
-    "STEM at Alene High School, Mekelle: robotics, practical laboratory science and technology, learned by building, testing and presenting.",
-};
-
-const APPROACH = [
-  {
-    title: "Research projects",
-    body: "Guided projects that build careful, critical scientific thinking.",
-  },
-  {
-    title: "Build and test",
-    body: "Students design something, try it, see where it fails and improve it.",
-  },
-  {
-    title: "Present the work",
-    body: "Projects are explained to judges, teachers and peers — at school and at competitions.",
-  },
-];
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent();
+  return { title: c.text("seo.stem.title"), description: c.text("seo.stem.description") };
+}
 
 export default async function StemCenterPage() {
-  const [programs, settings] = await Promise.all([
+  const [programs, settings, c] = await Promise.all([
     fetchProgramsByCategory("stem-center"),
     fetchSettings(),
+    getContent(),
   ]);
 
   const galleryImages = [
@@ -47,15 +32,15 @@ export default async function StemCenterPage() {
   return (
     <>
       <PageHeader
-        eyebrow={STEM_COPY.eyebrow}
+        eyebrow={c.text("stem.eyebrow")}
         title={
           <>
-            {STEM_COPY.headline}
-            <span className="block text-brand-600">{STEM_COPY.headlineAccent}</span>
+            {c.text("stem.headline")}
+            <span className="block text-brand-600">{c.text("stem.headlineAccent")}</span>
           </>
         }
-        intro={STEM_COPY.body}
-        image={settings.homeStemImage}
+        intro={c.text("stem.intro")}
+        image={settings.stemPageImage}
         imageAlt="Alene students presenting a fish-farming robot they built"
       />
 
@@ -63,9 +48,9 @@ export default async function StemCenterPage() {
       <section aria-labelledby="programs-title" className="section-y-sm border-t border-ink-200">
         <div className="container-page">
           <SectionHeading
-            eyebrow="Programs"
-            title={<span id="programs-title">Where students explore.</span>}
-            intro="Choose a program to see what students do and what they have achieved."
+            eyebrow={c.text("stem.programs.eyebrow")}
+            title={<span id="programs-title">{c.text("stem.programs.title")}</span>}
+            intro={c.text("stem.programs.intro")}
           />
           <ul className="mt-12 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {programs.map((program, i) => (
@@ -89,12 +74,12 @@ export default async function StemCenterPage() {
         <div className="container-page">
           <SectionHeading
             tone="light"
-            eyebrow="How STEM works here"
-            title={<span id="approach-title">Curiosity, then evidence.</span>}
+            eyebrow={c.text("stem.approach.eyebrow")}
+            title={<span id="approach-title">{c.text("stem.approach.title")}</span>}
           />
           <ol className="mt-12 grid grid-cols-1 gap-y-2 md:grid-cols-3 md:gap-x-8">
-            {APPROACH.map((item, i) => (
-              <Reveal as="li" key={item.title} delay={i * 100} className="border-t border-white/20 py-7">
+            {c.list("stem.approach.steps").map((item, i) => (
+              <Reveal as="li" key={i} delay={i * 100} className="border-t border-white/20 py-7">
                 <span className="font-display text-5xl font-extrabold tabular-nums text-white/25">
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -112,7 +97,10 @@ export default async function StemCenterPage() {
       {galleryImages.length > 0 && (
         <section aria-labelledby="gallery-title" className="section-y-sm">
           <div className="container-page">
-            <SectionHeading eyebrow="Gallery" title={<span id="gallery-title">In the lab and the workshop.</span>} />
+            <SectionHeading
+              eyebrow={c.text("stem.gallery.eyebrow")}
+              title={<span id="gallery-title">{c.text("stem.gallery.title")}</span>}
+            />
             <div className="mt-12 grid auto-rows-[150px] grid-cols-2 gap-3 sm:auto-rows-[220px] sm:gap-4 lg:grid-cols-4">
               {galleryImages.map((src, i) => (
                 <Reveal

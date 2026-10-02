@@ -3,7 +3,9 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { PHOTOS, SCHOOL_NAME, SITE_URL } from "@/lib/constants";
+import HideOnAdmin from "@/components/HideOnAdmin";
+import { PHOTOS, SITE_URL } from "@/lib/constants";
+import { buildNavigation, getContent } from "@/lib/content";
 import { fetchSettings } from "@/lib/settings";
 
 const inter = Inter({
@@ -19,41 +21,28 @@ const display = Plus_Jakarta_Sans({
   variable: "--font-display",
 });
 
-const DESCRIPTION =
-  "Alene High School is a public high school in Semen Sub-City, Mekelle, Ethiopia — building a culture of science, STEM learning, academic excellence and community service.";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SCHOOL_NAME} | Semen Sub-City, Mekelle`,
-    template: `%s | ${SCHOOL_NAME}`,
-  },
-  description: DESCRIPTION,
-  applicationName: SCHOOL_NAME,
-  keywords: [
-    "Alene High School",
-    "Mekelle",
-    "Semen Sub-City",
-    "public high school",
-    "Ethiopia",
-    "STEM",
-    "science education",
-  ],
-  openGraph: {
-    type: "website",
-    siteName: SCHOOL_NAME,
-    title: `${SCHOOL_NAME} | Semen Sub-City, Mekelle`,
-    description: DESCRIPTION,
-    images: [{ url: PHOTOS.labPractical, width: 1280, height: 720, alt: "Alene students in a laboratory practical" }],
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SCHOOL_NAME} | Semen Sub-City, Mekelle`,
-    description: DESCRIPTION,
-    images: [PHOTOS.labPractical],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [c, settings] = await Promise.all([getContent(), fetchSettings()]);
+  const title = c.text("seo.siteTitle");
+  const description = c.text("seo.siteDescription");
+  const image = settings.seoShareImage || PHOTOS.labPractical;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: title, template: `%s | ${settings.schoolName}` },
+    description,
+    applicationName: settings.schoolName,
+    keywords: [settings.schoolName, "Mekelle", "Semen Sub-City", "public high school", "Ethiopia", "STEM", "science education"],
+    openGraph: {
+      type: "website",
+      siteName: settings.schoolName,
+      title,
+      description,
+      images: [{ url: image, alt: settings.schoolName }],
+      locale: "en_US",
+    },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#A71930",
@@ -64,7 +53,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await fetchSettings();
+  const [settings, content] = await Promise.all([fetchSettings(), getContent()]);
+  const nav = buildNavigation(content);
 
   return (
     <html lang="en" className={`${inter.variable} ${display.variable}`} suppressHydrationWarning>
@@ -76,11 +66,13 @@ export default async function RootLayout({
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <Navbar settings={settings} />
+        <Navbar settings={settings} nav={nav} />
         <main id="main" className="min-h-[60vh]">
           {children}
         </main>
-        <Footer settings={settings} />
+        <HideOnAdmin>
+          <Footer settings={settings} nav={nav} content={content} />
+        </HideOnAdmin>
       </body>
     </html>
   );

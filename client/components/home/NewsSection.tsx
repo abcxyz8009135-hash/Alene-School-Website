@@ -4,13 +4,15 @@ import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import NewsMeta from "@/components/NewsMeta";
+import type { SiteContent } from "@/lib/content";
 import type { NewsArticle } from "@/lib/types";
 
 interface NewsSectionProps {
   articles: NewsArticle[];
+  content: SiteContent;
 }
 
-export default function NewsSection({ articles }: NewsSectionProps) {
+export default function NewsSection({ articles, content: c }: NewsSectionProps) {
   if (articles.length === 0) return null;
   const [featured, ...supporting] = articles;
 
@@ -20,11 +22,11 @@ export default function NewsSection({ articles }: NewsSectionProps) {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
             index="07"
-            eyebrow="Stay connected"
-            title={<span id="news-title">Latest from Alene.</span>}
+            eyebrow={c.text("home.news.eyebrow")}
+            title={<span id="news-title">{c.text("home.news.title")}</span>}
           />
           <Link href="/news" className="link-arrow shrink-0">
-            All news
+            {c.text("home.news.link")}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>

@@ -3,28 +3,29 @@ import { ArrowRight } from "lucide-react";
 import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import { COMMUNITY_COPY } from "@/lib/content";
+import type { SiteContent } from "@/lib/content";
 
 interface CommunitySectionProps {
   primaryImage: string;
   secondaryImage: string;
+  content: SiteContent;
 }
 
-export default function CommunitySection({ primaryImage, secondaryImage }: CommunitySectionProps) {
+export default function CommunitySection({ primaryImage, secondaryImage, content: c }: CommunitySectionProps) {
   return (
     <section aria-labelledby="community-title" className="section-y overflow-hidden bg-ink-50">
       <div className="container-page grid grid-cols-1 gap-16 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5 lg:pt-6">
           <SectionHeading
             index="06"
-            eyebrow={COMMUNITY_COPY.eyebrow}
-            title={<span id="community-title">{COMMUNITY_COPY.headline}</span>}
-            intro={COMMUNITY_COPY.body}
+            eyebrow={c.text("home.community.eyebrow")}
+            title={<span id="community-title">{c.text("home.community.headline")}</span>}
+            intro={c.text("home.community.body")}
           />
 
           <ul className="mt-10 space-y-6">
-            {COMMUNITY_COPY.themes.map((theme, i) => (
-              <Reveal as="li" key={theme.title} delay={i * 80} className="flex gap-4">
+            {c.list("home.community.themes").map((theme, i) => (
+              <Reveal as="li" key={i} delay={i * 80} className="flex gap-4">
                 <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-crimson-600" aria-hidden="true" />
                 <div>
                   <h3 className="font-display text-lg font-bold text-ink-900">{theme.title}</h3>
@@ -35,7 +36,7 @@ export default function CommunitySection({ primaryImage, secondaryImage }: Commu
           </ul>
 
           <Link href="/community" className="btn-secondary mt-10">
-            Clubs &amp; community life
+            {c.text("home.community.button")}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
@@ -59,7 +60,7 @@ export default function CommunitySection({ primaryImage, secondaryImage }: Commu
               />
             </div>
             <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-ink-500">
-              Community service, Alene students
+              {c.text("home.community.caption")}
             </p>
           </Reveal>
         </div>

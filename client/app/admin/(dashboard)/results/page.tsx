@@ -1,273 +1,214 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import AdminModal from "@/components/admin/AdminModal";
+import { useState } from "react";
+import Link from "next/link";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/admin/Toast";
+import { EXAM_STATUS_LABEL, EXAM_STATUS_TONE } from "@/components/admin/forms/ResultForm";
+import {
+  AdminPageHeader,
+  EmptyRow,
+  ErrorState,
+  FilterSelect,
+  ListToolbar,
+  LoadingRow,
+  Pagination,
+  RowActions,
+  SearchInput,
+  StatusBadge,
+  TableCard,
+  TableHead,
+  Td,
+  Th,
+} from "@/components/admin/ui";
 import { adminFetch } from "@/lib/adminApi";
+import { errorMessage } from "@/lib/admin/format";
+import { useAdminList } from "@/lib/admin/useAdminList";
+import { useListControls } from "@/lib/admin/useListControls";
 import type { ExamResult, ExamStatus } from "@/lib/types";
 
-const EMPTY_FORM = {
-  registrationId: "",
-  studentName: "",
-  score: 0,
-  total: 100,
-  status: "PENDING" as ExamStatus,
-  examYear: new Date().getFullYear(),
-};
-
-const STATUS_OPTIONS: ExamStatus[] = ["PASS", "FAIL", "PENDING"];
-
 export default function AdminResultsPage() {
-  const [results, setResults] = useState<ExamResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
+  const { items, setItems, loading, error, reload } = useAdminList<ExamResult>("/admin/results", "results");
+  const [toDelete, setToDelete] = useState<ExamResult | null>(null);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const list = useListControls(items, {
+    searchFields: (r) => [r.registrationId, r.studentName],
+    filters: {
+      status: (r, v) => r.status === v,
+      year: (r, v) => String(r.examYear) === v,
+    },
+    sorters: {
+      reg: (r) => r.registrationId,
+      name: (r) => r.studentName.toLowerCase(),
+      score: (r) => (r.total ? r.score / r.total : 0),
+      year: (r) => r.examYear,
+    },
+    initialSort: { key: "reg", dir: "asc" },
+    pageSize: 20,
+  });
 
-  async function loadResults() {
-    setLoading(true);
+  const years = Array.from(new Set(items.map((r) => r.examYear))).sort((a, b) => b - a);
+
+  async function handleDelete(result: ExamResult) {
     try {
-      const data = await adminFetch("/admin/results");
-      setResults(data.results);
+      await adminFetch(`/admin/results/${result.id}`, { method: "DELETE" });
+      setItems((prev) => prev.filter((r) => r.id !== result.id));
+      toast.success(`Result ${result.registrationId} deleted.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load exam results.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadResults();
-  }, []);
-
-  function openCreate() {
-    setEditingId(null);
-    setForm(EMPTY_FORM);
-    setFormError(null);
-    setModalOpen(true);
-  }
-
-  function openEdit(result: ExamResult) {
-    setEditingId(result.id);
-    setForm({
-      registrationId: result.registrationId,
-      studentName: result.studentName,
-      score: result.score,
-      total: result.total,
-      status: result.status,
-      examYear: result.examYear,
-    });
-    setFormError(null);
-    setModalOpen(true);
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setFormError(null);
-
-    try {
-      if (editingId) {
-        await adminFetch(`/admin/results/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(form),
-        });
-      } else {
-        await adminFetch("/admin/results", {
-          method: "POST",
-          body: JSON.stringify(form),
-        });
-      }
-      setModalOpen(false);
-      await loadResults();
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to save exam result.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this exam result? This cannot be undone.")) return;
-    try {
-      await adminFetch(`/admin/results/${id}`, { method: "DELETE" });
-      setResults((prev) => prev.filter((r) => r.id !== id));
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete exam result.");
+      toast.error(errorMessage(err, "Failed to delete exam result."));
+      throw err;
     }
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-ink-900">Entrance Exam Results</h1>
-          <p className="mt-1 text-sm text-ink-500">
-            Manage student entrance exam scores looked up by registration ID.
-          </p>
-        </div>
-        <button onClick={openCreate} className="btn-primary">
-          <Plus className="h-4 w-4" />
-          New Result
-        </button>
-      </div>
+    <>
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Dashboard", href: "/admin" }, { label: "Content" }, { label: "Exam Results" }]}
+        title="Exam Results"
+        description="Entrance exam results that students look up by registration ID on the Exam Results page."
+        actions={
+          <Link href="/admin/results/new" className="btn-primary btn-sm">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Add result
+          </Link>
+        }
+      />
 
-      {error && (
-        <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 ring-1 ring-inset ring-red-200">
-          {error}
-        </p>
-      )}
+      {error && <ErrorState message={error} onRetry={reload} />}
 
-      <div className="card mt-6 overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-ink-200 text-xs uppercase tracking-wider text-ink-400">
-            <tr>
-              <th className="px-5 py-3">Registration ID</th>
-              <th className="px-5 py-3">Student</th>
-              <th className="px-5 py-3">Score</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-ink-100">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink-400">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                </td>
-              </tr>
-            )}
-            {!loading && results.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-5 py-8 text-center text-ink-400">
-                  No exam results yet.
-                </td>
-              </tr>
-            )}
-            {results.map((result) => (
-              <tr key={result.id}>
-                <td className="px-5 py-3 font-mono text-xs font-medium text-ink-900">
-                  {result.registrationId}
-                </td>
-                <td className="px-5 py-3 text-ink-700">{result.studentName}</td>
-                <td className="px-5 py-3 text-ink-500">
-                  {result.score} / {result.total}
-                </td>
-                <td className="px-5 py-3">
-                  <span className="tag-pill">{result.status}</span>
-                </td>
-                <td className="px-5 py-3">
-                  <div className="flex justify-end gap-2">
-                    <button onClick={() => openEdit(result)} className="btn-icon">
-                      <Pencil className="h-3.5 w-3.5" />
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(result.id)} className="btn-danger">
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <AdminModal
-        open={modalOpen}
-        title={editingId ? "Edit Exam Result" : "New Exam Result"}
-        onClose={() => setModalOpen(false)}
+      <ListToolbar
+        summary={
+          !loading &&
+          (list.isFiltering
+            ? `${list.filteredCount} of ${list.totalCount} results`
+            : `${list.totalCount} ${list.totalCount === 1 ? "result" : "results"}`)
+        }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="form-label">Registration ID</label>
-            <input
-              required
-              value={form.registrationId}
-              onChange={(e) => setForm((f) => ({ ...f, registrationId: e.target.value }))}
-              className="input-field font-mono"
-              placeholder="AHS-2026-0005"
-            />
-          </div>
-          <div>
-            <label className="form-label">Student Name</label>
-            <input
-              required
-              value={form.studentName}
-              onChange={(e) => setForm((f) => ({ ...f, studentName: e.target.value }))}
-              className="input-field"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">Score</label>
-              <input
-                required
-                type="number"
-                min={0}
-                value={form.score}
-                onChange={(e) => setForm((f) => ({ ...f, score: Number(e.target.value) }))}
-                className="input-field"
-              />
-            </div>
-            <div>
-              <label className="form-label">Total</label>
-              <input
-                required
-                type="number"
-                min={1}
-                value={form.total}
-                onChange={(e) => setForm((f) => ({ ...f, total: Number(e.target.value) }))}
-                className="input-field"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">Status</label>
-              <select
-                value={form.status}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, status: e.target.value as ExamStatus }))
+        <SearchInput value={list.query} onChange={list.setQuery} placeholder="Registration ID or name…" label="Search results" />
+        <FilterSelect
+          label="Status"
+          value={list.filterValues.status ?? ""}
+          onChange={(v) => list.setFilter("status", v)}
+          options={[
+            { value: "", label: "All" },
+            ...(Object.keys(EXAM_STATUS_LABEL) as ExamStatus[]).map((s) => ({ value: s, label: EXAM_STATUS_LABEL[s] })),
+          ]}
+        />
+        {years.length > 1 && (
+          <FilterSelect
+            label="Year"
+            value={list.filterValues.year ?? ""}
+            onChange={(v) => list.setFilter("year", v)}
+            options={[{ value: "", label: "All" }, ...years.map((y) => ({ value: String(y), label: String(y) }))]}
+          />
+        )}
+      </ListToolbar>
+
+      <TableCard>
+        <TableHead>
+          <Th sortKey="reg" sort={list.sort} onSort={list.toggleSort}>
+            Registration ID
+          </Th>
+          <Th sortKey="name" sort={list.sort} onSort={list.toggleSort} className="hidden md:table-cell">
+            Student
+          </Th>
+          <Th sortKey="score" sort={list.sort} onSort={list.toggleSort} className="hidden sm:table-cell">
+            Score
+          </Th>
+          <Th className="hidden sm:table-cell">Status</Th>
+          <Th sortKey="year" sort={list.sort} onSort={list.toggleSort} className="hidden md:table-cell">
+            Year
+          </Th>
+          <Th align="right">Actions</Th>
+        </TableHead>
+        <tbody className="divide-y divide-ink-100">
+          {loading ? (
+            <LoadingRow colSpan={6} />
+          ) : list.pageItems.length === 0 ? (
+            list.isFiltering ? (
+              <EmptyRow
+                colSpan={6}
+                title="No matching results"
+                action={
+                  <button type="button" onClick={list.clearFilters} className="btn-icon">
+                    Clear filters
+                  </button>
                 }
-                className="input-field"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="form-label">Exam Year</label>
-              <input
-                required
-                type="number"
-                value={form.examYear}
-                onChange={(e) => setForm((f) => ({ ...f, examYear: Number(e.target.value) }))}
-                className="input-field"
               />
-            </div>
-          </div>
-
-          {formError && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-inset ring-red-200">
-              {formError}
-            </p>
+            ) : (
+              <EmptyRow
+                colSpan={6}
+                title="No exam results yet"
+                description="Results added here become searchable on the public Exam Results page."
+                action={
+                  <Link href="/admin/results/new" className="btn-primary btn-sm">
+                    <Plus className="h-4 w-4" aria-hidden="true" />
+                    Add the first result
+                  </Link>
+                }
+              />
+            )
+          ) : (
+            list.pageItems.map((r) => (
+              <tr key={r.id} className="hover:bg-ink-50/60">
+                <Td>
+                  <Link href={`/admin/results/${r.id}`} className="font-mono text-xs font-semibold text-ink-900 hover:text-brand-700">
+                    {r.registrationId}
+                  </Link>
+                  <p className="text-xs text-ink-500 md:hidden">
+                    {r.studentName} · {r.score}/{r.total} · {r.examYear}
+                  </p>
+                  <span className="mt-1.5 inline-block sm:hidden">
+                    <StatusBadge tone={EXAM_STATUS_TONE[r.status]}>{EXAM_STATUS_LABEL[r.status]}</StatusBadge>
+                  </span>
+                </Td>
+                <Td className="hidden text-ink-700 md:table-cell">{r.studentName}</Td>
+                <Td className="hidden whitespace-nowrap tabular-nums text-ink-600 sm:table-cell">
+                  {r.score} / {r.total}
+                  <span className="ml-1.5 text-xs text-ink-400">
+                    ({r.total ? Math.round((r.score / r.total) * 100) : 0}%)
+                  </span>
+                </Td>
+                <Td className="hidden sm:table-cell">
+                  <StatusBadge tone={EXAM_STATUS_TONE[r.status]}>{EXAM_STATUS_LABEL[r.status]}</StatusBadge>
+                </Td>
+                <Td className="hidden tabular-nums text-ink-600 md:table-cell">{r.examYear}</Td>
+                <Td>
+                  <RowActions>
+                    <Link href={`/admin/results/${r.id}`} className="btn-icon">
+                      <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="sr-only sm:not-sr-only">Edit</span>
+                    </Link>
+                    <button type="button" onClick={() => setToDelete(r)} className="btn-danger">
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="sr-only sm:not-sr-only">Delete</span>
+                    </button>
+                  </RowActions>
+                </Td>
+              </tr>
+            ))
           )}
+        </tbody>
+      </TableCard>
 
-          <button type="submit" disabled={saving} className="btn-primary w-full">
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editingId ? "Save Changes" : "Create Result"}
-          </button>
-        </form>
-      </AdminModal>
-    </div>
+      <Pagination page={list.page} pageCount={list.pageCount} onPageChange={list.setPage} />
+
+      <ConfirmDialog
+        open={toDelete !== null}
+        title="Delete exam result?"
+        message={
+          <>
+            The result for <strong className="text-ink-900">{toDelete?.studentName}</strong> (
+            <span className="font-mono">{toDelete?.registrationId}</span>) will be deleted and can no longer be looked
+            up. This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete result"
+        onConfirm={() => handleDelete(toDelete!)}
+        onClose={() => setToDelete(null)}
+      />
+    </>
   );
 }

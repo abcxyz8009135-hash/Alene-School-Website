@@ -21,6 +21,12 @@ export interface SiteSettings {
   homeCommunityImage2: string;
 
   aboutHeroImage: string;
+  academicsHeroImage: string;
+  academicsApproachImage: string;
+  stemPageImage: string;
+  communityImage1: string;
+  communityImage2: string;
+  seoShareImage: string;
   /** Hero image for the Community page (key kept from the former Hobbies page). */
   hobbiesHeroImage: string;
   stemHeroImage: string;
@@ -72,6 +78,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   homeCommunityImage2: PHOTOS.painting,
 
   aboutHeroImage: PHOTOS.assembly,
+  academicsHeroImage: PHOTOS.labPractical,
+  academicsApproachImage: PHOTOS.microscope,
+  stemPageImage: PHOTOS.roboticsProject,
+  communityImage1: PHOTOS.cleanup,
+  communityImage2: PHOTOS.assembly,
+  seoShareImage: PHOTOS.labPractical,
   hobbiesHeroImage: PHOTOS.painting,
   stemHeroImage: PHOTOS.microscope,
 
@@ -126,23 +138,31 @@ function isLegacyPlaceholder(value: string) {
 }
 
 /**
- * Fetches admin-managed site settings, falling back to the defaults above for
- * any key that hasn't been set yet (or if the API is unreachable).
+ * Raw key/value map of every stored setting (empty if the API is unreachable).
+ * Next.js de-duplicates this fetch within a render, so calling it from several
+ * places on one page costs a single request.
  */
-export async function fetchSettings(): Promise<SiteSettings> {
+export async function fetchSettingsMap(): Promise<Record<string, string>> {
   try {
     const res = await fetch(`${API_BASE_URL}/settings`, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Settings request failed");
     const data = await res.json();
-    const settings = (data.settings || {}) as Record<string, string>;
-
-    const merged = { ...DEFAULT_SETTINGS };
-    for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof SiteSettings)[]) {
-      const value = settings[key];
-      if (value && !isLegacyPlaceholder(value)) merged[key] = value;
-    }
-    return merged;
+    return (data.settings || {}) as Record<string, string>;
   } catch {
-    return DEFAULT_SETTINGS;
+    return {};
   }
+}
+
+/**
+ * Admin-managed site settings, falling back to the defaults above for any key
+ * that hasn't been set yet (or if the API is unreachable).
+ */
+export async function fetchSettings(): Promise<SiteSettings> {
+  const settings = await fetchSettingsMap();
+  const merged = { ...DEFAULT_SETTINGS };
+  for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof SiteSettings)[]) {
+    const value = settings[key];
+    if (value && !isLegacyPlaceholder(value)) merged[key] = value;
+  }
+  return merged;
 }

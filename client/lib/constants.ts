@@ -20,22 +20,21 @@ export const CONTACT_INFO = {
   hours: "",
 };
 
-export const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about-us" },
-  { label: "Academics", href: "/academics" },
-  { label: "STEM", href: "/stem-center" },
-  { label: "Community", href: "/community" },
-  { label: "News", href: "/news" },
-];
+/**
+ * Site navigation. Destinations are fixed here; the labels are editable in
+ * Admin → Site → Navigation & footer (see lib/contentRegistry.ts).
+ */
+export const NAV_ITEMS = [
+  { key: "nav.home", href: "/" },
+  { key: "nav.about", href: "/about-us" },
+  { key: "nav.academics", href: "/academics" },
+  { key: "nav.stem", href: "/stem-center" },
+  { key: "nav.community", href: "/community" },
+  { key: "nav.news", href: "/news" },
+] as const;
 
-export const EXAM_RESULTS_LINK = { label: "Exam Results", href: "/entrance-exam-result" };
-
-export const FOOTER_LINKS = [
-  ...NAV_LINKS.filter((l) => l.href !== "/"),
-  EXAM_RESULTS_LINK,
-  { label: "Contact", href: "/contact-us" },
-];
+export const EXAM_RESULTS_HREF = "/entrance-exam-result";
+export const CONTACT_HREF = "/contact-us";
 
 /** Real photographs of Alene students and school life, stored in /public/images. */
 export const PHOTOS = {

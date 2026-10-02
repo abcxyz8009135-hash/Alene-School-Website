@@ -2,14 +2,16 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
-import { STEM_COPY } from "@/lib/content";
+import { internalHref, type SiteContent } from "@/lib/content";
 
 interface StemSectionProps {
   image: string;
   insetImage: string;
+  content: SiteContent;
 }
 
-export default function StemSection({ image, insetImage }: StemSectionProps) {
+export default function StemSection({ image, insetImage, content: c }: StemSectionProps) {
+  const items = c.list("home.stem.items");
   return (
     <section aria-labelledby="stem-title" className="section-y relative overflow-hidden bg-brand-900 text-white">
       <div
@@ -22,20 +24,20 @@ export default function StemSection({ image, insetImage }: StemSectionProps) {
           <div className="lg:col-span-8">
             <div className="flex items-center gap-4">
               <span className="section-index text-white/50">04</span>
-              <p className="eyebrow eyebrow-light">{STEM_COPY.eyebrow}</p>
+              <p className="eyebrow eyebrow-light">{c.text("home.stem.eyebrow")}</p>
             </div>
             <h2 id="stem-title" className="display-2 mt-6">
-              <span className="block">{STEM_COPY.headline}</span>
-              <span className="block text-brand-300">{STEM_COPY.headlineAccent}</span>
+              <span className="block">{c.text("home.stem.headline")}</span>
+              <span className="block text-brand-300">{c.text("home.stem.headlineAccent")}</span>
             </h2>
           </div>
           <div className="lg:col-span-4">
-            <p className="text-lg leading-relaxed text-white/75">{STEM_COPY.body}</p>
+            <p className="text-lg leading-relaxed text-white/75">{c.text("home.stem.body")}</p>
             <Link
               href="/stem-center"
               className="btn mt-6 bg-white text-brand-800 hover:bg-brand-50 focus-visible:ring-white focus-visible:ring-offset-brand-900"
             >
-              Explore STEM at Alene
+              {c.text("home.stem.button")}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -59,11 +61,15 @@ export default function StemSection({ image, insetImage }: StemSectionProps) {
           </div>
         </Reveal>
 
-        <ol className="mt-16 grid grid-cols-1 gap-y-2 sm:mt-24 md:grid-cols-3 md:gap-x-8">
-          {STEM_COPY.items.map((item, i) => (
-            <Reveal as="li" key={item.title} delay={i * 100}>
+        <ol
+          className={`mt-16 grid grid-cols-1 gap-y-2 sm:mt-24 md:gap-x-8 ${
+            items.length >= 4 ? "md:grid-cols-2 lg:grid-cols-4" : items.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"
+          }`}
+        >
+          {items.map((item, i) => (
+            <Reveal as="li" key={i} delay={i * 100}>
               <Link
-                href={item.href}
+                href={internalHref(item.href, "/stem-center")}
                 className="group block border-t border-white/20 py-7 transition-colors hover:border-white focus-visible:ring-white focus-visible:ring-offset-brand-900"
               >
                 <div className="flex items-start justify-between">

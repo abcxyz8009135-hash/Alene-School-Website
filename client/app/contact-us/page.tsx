@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 import PageHeader from "@/components/PageHeader";
+import { getContent } from "@/lib/content";
 import { fetchSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact Alene High School in Semen Sub-City, Mekelle, Ethiopia.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent();
+  return { title: c.text("seo.contact.title"), description: c.text("seo.contact.description") };
+}
 
 export default async function ContactUsPage() {
-  const settings = await fetchSettings();
+  const [settings, c] = await Promise.all([fetchSettings(), getContent()]);
 
   const details = [
     { icon: MapPin, label: "Address", value: settings.contactAddress },
@@ -27,15 +28,15 @@ export default async function ContactUsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Contact"
-        title="Get in touch."
-        intro="Questions about admissions, academics or school life? Send us a message or reach the registrar directly."
+        eyebrow={c.text("contact.eyebrow")}
+        title={c.text("contact.headline")}
+        intro={c.text("contact.intro")}
       />
 
       <section className="border-t border-ink-200 pb-16 sm:pb-24 lg:pb-32">
         <div className="container-page grid grid-cols-1 gap-14 pt-12 lg:grid-cols-12 lg:gap-16 lg:pt-16">
           <div className="lg:col-span-7">
-            <h2 className="font-display text-2xl font-bold text-ink-900">Send a message</h2>
+            <h2 className="font-display text-2xl font-bold text-ink-900">{c.text("contact.formTitle")}</h2>
             <div className="mt-8">
               <ContactForm />
             </div>

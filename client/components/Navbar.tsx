@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, LogIn, Mail, Menu, Phone, X } from "lucide-react";
 import Logo from "./Logo";
 import AuthModal from "./AuthModal";
-import { EXAM_RESULTS_LINK, NAV_LINKS } from "@/lib/constants";
+import type { SiteNavigation } from "@/lib/content";
 import type { SiteSettings } from "@/lib/settings";
 
 interface NavbarProps {
   settings: SiteSettings;
+  nav: SiteNavigation;
 }
 
 function isActive(pathname: string, href: string) {
@@ -18,7 +19,7 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function Navbar({ settings }: NavbarProps) {
+export default function Navbar({ settings, nav }: NavbarProps) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -85,7 +86,7 @@ export default function Navbar({ settings }: NavbarProps) {
     };
   }, [menuOpen, closeMenu]);
 
-  const examActive = isActive(pathname, EXAM_RESULTS_LINK.href);
+  const examActive = isActive(pathname, nav.exam.href);
 
   return (
     <>
@@ -103,7 +104,7 @@ export default function Navbar({ settings }: NavbarProps) {
           <Logo logoUrl={settings.logoUrl} schoolName={settings.schoolName} tone="light" />
 
           <ul className="hidden items-center gap-1 lg:flex">
-            {NAV_LINKS.map((link) => {
+            {nav.main.map((link) => {
               const active = isActive(pathname, link.href);
               return (
                 <li key={link.href}>
@@ -134,14 +135,14 @@ export default function Navbar({ settings }: NavbarProps) {
               className="hidden items-center gap-1.5 rounded px-3 py-2 text-sm font-semibold text-white/80 transition-colors hover:text-white focus-visible:ring-white focus-visible:ring-offset-crimson-600 xl:inline-flex"
             >
               <LogIn className="h-4 w-4" aria-hidden="true" />
-              Portal
+              {nav.portalLabel}
             </button>
             <Link
-              href={EXAM_RESULTS_LINK.href}
+              href={nav.exam.href}
               aria-current={examActive ? "page" : undefined}
               className="btn-primary focus-visible:ring-white focus-visible:ring-offset-crimson-600"
             >
-              {EXAM_RESULTS_LINK.label}
+              {nav.exam.label}
             </Link>
           </div>
 
@@ -190,7 +191,7 @@ export default function Navbar({ settings }: NavbarProps) {
             </div>
 
             <ul className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
-              {NAV_LINKS.map((link, i) => {
+              {nav.main.map((link, i) => {
                 const active = isActive(pathname, link.href);
                 return (
                   <li key={link.href} className="border-b border-ink-100">
@@ -215,23 +216,25 @@ export default function Navbar({ settings }: NavbarProps) {
               })}
               <li className="border-b border-ink-100">
                 <Link
-                  href="/contact-us"
+                  href={nav.contact.href}
                   onClick={() => setMenuOpen(false)}
                   className="flex items-baseline gap-4 py-4 font-display text-2xl font-bold tracking-tight text-ink-900"
                 >
-                  <span className="w-6 text-xs font-semibold tabular-nums text-ink-400">07</span>
-                  Contact
+                  <span className="w-6 text-xs font-semibold tabular-nums text-ink-400">
+                    {String(nav.main.length + 1).padStart(2, "0")}
+                  </span>
+                  {nav.contact.label}
                 </Link>
               </li>
             </ul>
 
             <div className="space-y-3 border-t border-ink-100 bg-ink-50 px-4 py-5 sm:px-6">
               <Link
-                href={EXAM_RESULTS_LINK.href}
+                href={nav.exam.href}
                 onClick={() => setMenuOpen(false)}
                 className="btn-primary w-full"
               >
-                Check {EXAM_RESULTS_LINK.label}
+                {nav.exam.label}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <button
@@ -243,7 +246,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 className="btn-secondary w-full"
               >
                 <LogIn className="h-4 w-4" aria-hidden="true" />
-                Portal login
+                {nav.portalLabel}
               </button>
               <div className="flex flex-col gap-1.5 pt-2 text-sm text-ink-500">
                 {settings.contactPhone && (

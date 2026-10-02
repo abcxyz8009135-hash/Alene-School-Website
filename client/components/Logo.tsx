@@ -8,8 +8,8 @@ interface LogoProps {
   /** "light" for use on the red navbar / footer, "dark" on white. */
   tone?: "light" | "dark";
   size?: "md" | "lg";
-  /** Show "Semen Sub-City · Mekelle" under the name. */
-  showLocation?: boolean;
+  /** Optional line under the name, e.g. "Semen Sub-City · Mekelle". */
+  locationLine?: string;
   className?: string;
 }
 
@@ -22,7 +22,7 @@ export default function Logo({
   schoolName = SCHOOL_NAME,
   tone = "light",
   size = "md",
-  showLocation = false,
+  locationLine,
   className = "",
 }: LogoProps) {
   const crest = size === "lg" ? "h-20 w-20" : "h-12 w-12 lg:h-[52px] lg:w-[52px]";
@@ -53,9 +53,9 @@ export default function Logo({
         >
           {schoolName}
         </span>
-        {showLocation && (
+        {locationLine && (
           <span className={`mt-1.5 text-[11px] font-medium tracking-wide ${subColor}`}>
-            Semen Sub-City · Mekelle
+            {locationLine}
           </span>
         )}
       </span>

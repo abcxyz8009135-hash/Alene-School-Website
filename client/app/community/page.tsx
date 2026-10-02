@@ -4,41 +4,46 @@ import Photo from "@/components/Photo";
 import ProgramCard from "@/components/ProgramCard";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import { COMMUNITY_COPY } from "@/lib/content";
+import { getContent } from "@/lib/content";
 import { fetchProgramsByCategory } from "@/lib/programs";
 import { fetchSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "Community",
-  description:
-    "Community life at Alene High School, Mekelle: community service, clubs, sports, the arts and student leadership.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent();
+  return { title: c.text("seo.community.title"), description: c.text("seo.community.description") };
+}
 
 export default async function CommunityPage() {
-  const [programs, settings] = await Promise.all([
+  const [programs, settings, c] = await Promise.all([
     fetchProgramsByCategory("hobbies"),
     fetchSettings(),
+    getContent(),
   ]);
+  const themes = c.list("community.themes");
 
   return (
     <>
       <PageHeader
-        eyebrow={COMMUNITY_COPY.eyebrow}
-        title={COMMUNITY_COPY.headline}
-        intro={COMMUNITY_COPY.body}
+        eyebrow={c.text("community.eyebrow")}
+        title={c.text("community.headline")}
+        intro={c.text("community.intro")}
         image={settings.hobbiesHeroImage}
         imageAlt="Students painting a school building as a community service project"
       />
 
       {/* Themes */}
       <section aria-label="Community themes" className="border-y border-ink-200 bg-ink-50">
-        <ol className="container-page grid grid-cols-1 divide-y divide-ink-200 md:grid-cols-3 md:divide-x md:divide-y-0">
-          {COMMUNITY_COPY.themes.map((theme, i) => (
+        <ol
+          className={`container-page grid grid-cols-1 divide-y divide-ink-200 md:divide-x md:divide-y-0 ${
+            themes.length === 1 ? "" : themes.length === 2 || themes.length === 4 ? "md:grid-cols-2" : "md:grid-cols-3"
+          }`}
+        >
+          {themes.map((theme, i) => (
             <Reveal
               as="li"
-              key={theme.title}
+              key={i}
               delay={i * 80}
-              className={`py-10 ${i === 0 ? "md:pr-8" : i === 1 ? "md:px-8" : "md:pl-8"}`}
+              className="py-10 md:px-8 md:first:pl-0 md:last:pr-0"
             >
               <span className="font-display text-sm font-semibold tabular-nums text-crimson-600">
                 {String(i + 1).padStart(2, "0")}
@@ -54,9 +59,9 @@ export default async function CommunityPage() {
       <section aria-labelledby="clubs-title" className="section-y-sm">
         <div className="container-page">
           <SectionHeading
-            eyebrow="Clubs & programs"
-            title={<span id="clubs-title">Ways to take part.</span>}
-            intro="Every student can find a place beyond lessons — on the pitch, on stage, in council or out in the community."
+            eyebrow={c.text("community.clubs.eyebrow")}
+            title={<span id="clubs-title">{c.text("community.clubs.title")}</span>}
+            intro={c.text("community.clubs.intro")}
           />
           <ul className="mt-12 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             {programs.map((program, i) => (
@@ -80,7 +85,7 @@ export default async function CommunityPage() {
         <div className="container-page grid grid-cols-1 gap-4 sm:grid-cols-12">
           <Reveal className="sm:col-span-7">
             <Photo
-              src={settings.homeCommunityImage1}
+              src={settings.communityImage1}
               alt="Alene students and staff clearing the school grounds together"
               sizes="(min-width: 640px) 58vw, 100vw"
               className="aspect-[4/3] w-full rounded-sm"
@@ -88,7 +93,7 @@ export default async function CommunityPage() {
           </Reveal>
           <Reveal delay={100} className="sm:col-span-5 sm:mt-24">
             <Photo
-              src={settings.homeAcademicsImage}
+              src={settings.communityImage2}
               alt="Alene students gathered for morning assembly"
               sizes="(min-width: 640px) 42vw, 100vw"
               className="aspect-[4/3] w-full rounded-sm"

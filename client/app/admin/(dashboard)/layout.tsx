@@ -1,46 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import {
-  Award,
-  ClipboardList,
-  FileText,
-  KeyRound,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Newspaper,
-  Settings,
-  UserPlus,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Loader2, Menu, X } from "lucide-react";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import { ToastProvider } from "@/components/admin/Toast";
 import { API_BASE_URL } from "@/lib/constants";
+import { ADMIN_NAV, isNavItemActive } from "@/lib/admin/nav";
 import {
   AdminUser,
+  adminFetch,
   clearAdminSession,
   getAdminToken,
   getAdminUser,
   setAdminSession,
 } from "@/lib/adminApi";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "News", href: "/admin/news", icon: Newspaper },
-  { label: "Exam Results", href: "/admin/results", icon: ClipboardList },
-  { label: "Programs", href: "/admin/program-content", icon: FileText },
-  { label: "Achievements", href: "/admin/programs", icon: Award },
-  { label: "Site Content", href: "/admin/content", icon: Settings },
-  { label: "Access Requests", href: "/admin/access-requests", icon: UserPlus },
-  { label: "Account", href: "/admin/account", icon: KeyRound },
-];
-
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
   const [user, setUser] = useState<AdminUser | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
+  // Session check (unchanged): the token must belong to an admin according to
+  // the API. The API itself enforces admin auth on every /api/admin route.
   useEffect(() => {
     let cancelled = false;
 
@@ -78,6 +65,58 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     };
   }, [router]);
 
+  // Pending access-request count for the sidebar badge; refreshed on navigation.
+  useEffect(() => {
+    if (checking) return;
+    adminFetch("/admin/access-requests")
+      .then((data) =>
+        setPendingRequests(
+          (data?.requests ?? []).filter((r: { status: string }) => r.status === "PENDING").length
+        )
+      )
+      .catch(() => undefined);
+  }, [checking, pathname]);
+
+  // Close the drawer on navigation.
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    menuButtonRef.current?.focus();
+  }, []);
+
+  // Drawer: Escape closes, focus stays inside, page doesn't scroll behind it.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusable = () =>
+      Array.from(drawerRef.current?.querySelectorAll<HTMLElement>("a[href], button") ?? []);
+    focusable()[0]?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") return closeDrawer();
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [drawerOpen, closeDrawer]);
+
   function handleLogout() {
     clearAdminSession();
     router.replace("/admin/login");
@@ -85,82 +124,76 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   if (checking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-50">
-        <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+      <div className="flex min-h-[70vh] items-center justify-center bg-ink-50">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-600" aria-label="Checking your session" />
       </div>
     );
   }
 
+  const badges = { "/admin/access-requests": pendingRequests };
+  const currentItem = ADMIN_NAV.flatMap((g) => g.items).find((item) => isNavItemActive(pathname, item));
+
   return (
-    <div className="min-h-screen bg-ink-50">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 border-r border-ink-200 bg-white sm:block">
-          <div className="flex h-16 items-center border-b border-ink-200 px-6">
-            <span className="font-bold text-ink-900">Admin Panel</span>
-          </div>
-          <nav className="flex flex-col gap-1 p-4">
-            {NAV_ITEMS.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                    active
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-ink-600 hover:bg-ink-100 hover:text-ink-900"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="mt-auto border-t border-ink-200 p-4">
-            <p className="truncate text-xs font-medium text-ink-900">{user?.fullName}</p>
-            <p className="truncate text-xs text-ink-400">{user?.email}</p>
-            <button
-              onClick={handleLogout}
-              className="mt-3 flex w-full items-center gap-2 rounded-lg border border-ink-200 px-3 py-2 text-xs font-semibold text-ink-600 transition hover:bg-ink-100"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Log Out
-            </button>
+    <ToastProvider>
+      <div className="min-h-[calc(100vh-72px)] bg-ink-50 lg:flex">
+        {/* Desktop sidebar */}
+        <aside className="hidden w-64 shrink-0 border-r border-ink-200 bg-white lg:block">
+          <div className="sticky top-[68px] h-[calc(100vh-68px)]">
+            <AdminSidebar user={user} onLogout={handleLogout} badges={badges} />
           </div>
         </aside>
 
-        <div className="flex-1">
-          <header className="flex h-16 items-center justify-between border-b border-ink-200 bg-white px-4 sm:hidden">
-            <span className="font-bold text-ink-900">Admin Panel</span>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs font-semibold text-ink-600"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Log Out
-            </button>
-          </header>
-          <nav className="flex gap-1 overflow-x-auto border-b border-ink-200 bg-white p-2 sm:hidden">
-            {NAV_ITEMS.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium ${
-                    active ? "bg-brand-50 text-brand-700" : "text-ink-600"
-                  }`}
-                >
-                  <item.icon className="h-3.5 w-3.5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <main className="p-4 sm:p-8">{children}</main>
+        {/* Mobile / tablet top bar */}
+        <div className="sticky top-16 z-30 flex h-12 items-center gap-3 border-b border-ink-200 bg-white px-4 lg:hidden">
+          <button
+            ref={menuButtonRef}
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="-ml-1 inline-flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold text-ink-700 hover:bg-ink-100"
+            aria-expanded={drawerOpen}
+            aria-controls="admin-drawer"
+          >
+            <Menu className="h-5 w-5" aria-hidden="true" />
+            Admin menu
+          </button>
+          {currentItem && (
+            <span className="truncate border-l border-ink-200 pl-3 text-sm text-ink-500">{currentItem.label}</span>
+          )}
+          {pendingRequests > 0 && (
+            <span className="ml-auto rounded-full bg-crimson-600 px-2 py-0.5 text-[10px] font-bold text-white">
+              {pendingRequests} pending
+            </span>
+          )}
         </div>
+
+        {drawerOpen && (
+          <div className="fixed inset-0 z-[55] lg:hidden">
+            <div className="absolute inset-0 animate-fade-in bg-ink-950/50" onClick={closeDrawer} aria-hidden="true" />
+            <div
+              id="admin-drawer"
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Admin menu"
+              className="absolute inset-y-0 left-0 w-72 max-w-[85vw] animate-fade-in bg-white shadow-card"
+            >
+              <button
+                type="button"
+                onClick={closeDrawer}
+                className="absolute right-3 top-3 z-10 rounded-md p-1.5 text-ink-500 hover:bg-ink-100 hover:text-ink-900"
+                aria-label="Close admin menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <AdminSidebar user={user} onLogout={handleLogout} onNavigate={() => setDrawerOpen(false)} badges={badges} />
+            </div>
+          </div>
+        )}
+
+        <main id="admin-main" className="min-w-0 flex-1 px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
+          <div className="mx-auto max-w-6xl">{children}</div>
+        </main>
       </div>
-    </div>
+    </ToastProvider>
   );
 }

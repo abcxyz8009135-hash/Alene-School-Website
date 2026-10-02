@@ -4,13 +4,13 @@ import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import ExamResultsCTA from "@/components/ExamResultsCTA";
+import { getContent } from "@/lib/content";
 import { fetchSettings } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "The story, mission and values of Alene High School, a public high school in Semen Sub-City, Mekelle.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent();
+  return { title: c.text("seo.about.title"), description: c.text("seo.about.description") };
+}
 
 function initials(name: string) {
   return name
@@ -23,7 +23,7 @@ function initials(name: string) {
 }
 
 export default async function AboutUsPage() {
-  const settings = await fetchSettings();
+  const [settings, c] = await Promise.all([fetchSettings(), getContent()]);
 
   const coreValues = [
     { title: settings.coreValue1Title, desc: settings.coreValue1Description },
@@ -35,14 +35,14 @@ export default async function AboutUsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="About Alene"
+        eyebrow={c.text("about.eyebrow")}
         title={
           <>
-            A public school with
-            <span className="block text-brand-600">a science-first spirit.</span>
+            {c.text("about.headline")}
+            <span className="block text-brand-600">{c.text("about.headlineAccent")}</span>
           </>
         }
-        intro={`${settings.schoolName} serves students in Semen Sub-City, Mekelle. Our motto — “${settings.schoolMotto}” — shapes how we teach, learn and work together.`}
+        intro={c.text("about.intro")}
         image={settings.aboutHeroImage}
         imageAlt="Alene students gathered for morning assembly in the school courtyard"
       />
@@ -51,9 +51,9 @@ export default async function AboutUsPage() {
       <section aria-labelledby="history-title" className="section-y-sm border-t border-ink-200">
         <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <p className="eyebrow">Our history</p>
+            <p className="eyebrow">{c.text("about.history.eyebrow")}</p>
             <h2 id="history-title" className="section-heading mt-5">
-              Where we come from.
+              {c.text("about.history.title")}
             </h2>
           </div>
           <Reveal className="prose-body lg:col-span-7 lg:col-start-6 lg:text-lg">
@@ -67,8 +67,8 @@ export default async function AboutUsPage() {
       <section aria-label="Mission and vision" className="bg-brand-900 text-white">
         <div className="container-page grid grid-cols-1 divide-y divide-white/15 md:grid-cols-2 md:divide-x md:divide-y-0">
           {[
-            { label: "Mission", text: settings.aboutMission },
-            { label: "Vision", text: settings.aboutVision },
+            { label: c.text("about.mission.label"), text: settings.aboutMission },
+            { label: c.text("about.vision.label"), text: settings.aboutVision },
           ].map((item, i) => (
             <Reveal key={item.label} delay={i * 100} className={`py-14 sm:py-20 ${i === 0 ? "md:pr-12" : "md:pl-12"}`}>
               <p className="eyebrow eyebrow-light">{item.label}</p>
@@ -83,8 +83,8 @@ export default async function AboutUsPage() {
         <section aria-labelledby="values-title" className="section-y-sm">
           <div className="container-page">
             <SectionHeading
-              eyebrow="Core values"
-              title={<span id="values-title">The principles behind the work.</span>}
+              eyebrow={c.text("about.values.eyebrow")}
+              title={<span id="values-title">{c.text("about.values.title")}</span>}
             />
             <ol className="mt-12 grid grid-cols-1 gap-y-10 sm:grid-cols-2 sm:gap-x-10 lg:grid-cols-4">
               {coreValues.map((value, i) => (
@@ -116,16 +116,11 @@ export default async function AboutUsPage() {
             </div>
           </Reveal>
           <div className="lg:col-span-7 lg:col-start-6">
-            <p className="eyebrow">Our crest</p>
+            <p className="eyebrow">{c.text("about.crest.eyebrow")}</p>
             <h2 id="crest-title" className="section-heading mt-5">
-              Semen Sub-City Alene High School.
+              {c.text("about.crest.title")}
             </h2>
-            <p className="prose-body mt-6">
-              The school crest carries our name in Ge&apos;ez script and in English, together with
-              the Mekelle Administration Office. At its centre sit a balanced pair of scales and an
-              upward arrow, framed by a gear — the same circular geometry you will see echoed
-              across this site.
-            </p>
+            <p className="prose-body mt-6">{c.text("about.crest.body")}</p>
           </div>
         </div>
       </section>
@@ -134,7 +129,7 @@ export default async function AboutUsPage() {
       <section aria-labelledby="principal-title" className="section-y-sm">
         <div className="container-page grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <p className="eyebrow">Principal&apos;s message</p>
+            <p className="eyebrow">{c.text("about.principal.eyebrow")}</p>
             <div className="mt-8 flex items-center gap-4">
               <span
                 aria-hidden="true"

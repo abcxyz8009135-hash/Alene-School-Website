@@ -1,8 +1,8 @@
 "use client";
 
-// SSR/CSR hybrid: the shell is server-rendered on first load (Next.js renders
-// client components to HTML too), then the search + result card are fully
-// interactive/client-driven since the result depends on user-submitted input.
+// The exam result lookup. The page around it (app/entrance-exam-result) is a
+// server component that passes in the admin-editable copy; the search itself
+// runs in the browser because the result depends on what the student types.
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
@@ -31,7 +31,16 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export default function EntranceExamResultPage() {
+export interface ExamCopy {
+  eyebrow: string;
+  headline: string;
+  intro: string;
+  hint: string;
+  help: string;
+  helpLink: string;
+}
+
+export default function ExamResultLookup({ copy }: { copy: ExamCopy }) {
   const [registrationId, setRegistrationId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,10 +86,10 @@ export default function EntranceExamResultPage() {
           className="crest-rings pointer-events-none absolute -right-48 -top-48 h-[560px] w-[560px] text-white/[0.07]"
         />
         <div className="container-page relative pb-28 pt-14 sm:pb-32 sm:pt-20">
-          <p className="eyebrow eyebrow-light">Academic results</p>
-          <h1 className="display-2 mt-6 max-w-3xl">Check your entrance exam result.</h1>
+          <p className="eyebrow eyebrow-light">{copy.eyebrow}</p>
+          <h1 className="display-2 mt-6 max-w-3xl">{copy.headline}</h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
-            Enter the registration ID printed on your exam slip to see your score and status.
+            {copy.intro}
           </p>
         </div>
       </header>
@@ -117,7 +126,7 @@ export default function EntranceExamResultPage() {
               </button>
             </div>
             <p id="registration-hint" className="mt-3 text-xs text-ink-500">
-              Sample IDs: AHS-2026-0001, AHS-2026-0002, AHS-2026-0003, AHS-2026-0004
+              {copy.hint}
             </p>
 
             {error && (
@@ -185,9 +194,9 @@ export default function EntranceExamResultPage() {
           )}
 
           <div className="mt-14 max-w-2xl border-t border-ink-200 pt-8 text-sm leading-relaxed text-ink-500">
-            Can&apos;t find your result? Check that the ID matches your exam slip exactly, or{" "}
+            {copy.help}{" "}
             <Link href="/contact-us" className="font-semibold text-brand-700 underline-offset-4 hover:underline">
-              contact the registrar
+              {copy.helpLink}
             </Link>
             .
           </div>

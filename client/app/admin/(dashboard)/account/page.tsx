@@ -1,23 +1,27 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { KeyRound, Loader2 } from "lucide-react";
-import { adminFetch, AdminApiError, getAdminUser } from "@/lib/adminApi";
+import { FormEvent, useEffect, useState } from "react";
+import { useToast } from "@/components/admin/Toast";
+import { AdminPageHeader, ErrorState, Field, FormSection } from "@/components/admin/ui";
+import { adminFetch, AdminApiError, getAdminUser, type AdminUser } from "@/lib/adminApi";
+import { Loader2 } from "lucide-react";
 
 export default function AdminAccountPage() {
-  const user = getAdminUser();
-
+  const toast = useToast();
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUser(getAdminUser());
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
 
     if (newPassword !== confirmPassword) {
       setError("New password and confirmation do not match.");
@@ -30,7 +34,7 @@ export default function AdminAccountPage() {
         method: "POST",
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      setSuccess(data.message || "Password updated successfully.");
+      toast.success(data?.message || "Password updated.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -42,72 +46,80 @@ export default function AdminAccountPage() {
   }
 
   return (
-    <div>
-      <div>
-        <h1 className="text-2xl font-bold text-ink-900">Account</h1>
-        <p className="mt-1 text-sm text-ink-500">Manage your admin login credentials.</p>
+    <>
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Dashboard", href: "/admin" }, { label: "System" }, { label: "My account" }]}
+        title="My account"
+        description="Your administrator profile and password."
+      />
+
+      <div className="max-w-2xl space-y-6">
+        <FormSection title="Profile">
+          <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">Name</dt>
+              <dd className="mt-1 text-ink-900">{user?.fullName ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">Email</dt>
+              <dd className="mt-1 break-all text-ink-900">{user?.email ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">Role</dt>
+              <dd className="mt-1 capitalize text-ink-900">{user?.role ?? "—"}</dd>
+            </div>
+          </dl>
+        </FormSection>
+
+        <form onSubmit={handleSubmit}>
+          <FormSection title="Change password" description="Use at least 6 characters.">
+            {error && <ErrorState message={error} />}
+            <Field label="Current password" htmlFor="current-password">
+              <input
+                id="current-password"
+                required
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="input-field"
+              />
+            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="New password" htmlFor="new-password">
+                <input
+                  id="new-password"
+                  required
+                  minLength={6}
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="input-field"
+                />
+              </Field>
+              <Field label="Confirm new password" htmlFor="confirm-password">
+                <input
+                  id="confirm-password"
+                  required
+                  minLength={6}
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-field"
+                />
+              </Field>
+            </div>
+            <div className="flex justify-end">
+              <button type="submit" disabled={saving} className="btn-primary btn-sm">
+                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                Update password
+              </button>
+            </div>
+          </FormSection>
+        </form>
       </div>
-
-      <div className="card mt-6 max-w-md p-6">
-        <p className="text-sm font-medium text-ink-900">{user?.fullName}</p>
-        <p className="text-xs text-ink-400">{user?.email}</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="card mt-6 max-w-md space-y-4 p-6">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-ink-900">
-          <KeyRound className="h-4.5 w-4.5" />
-          Change Password
-        </h2>
-
-        <div>
-          <label className="form-label">Current Password</label>
-          <input
-            required
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="input-field"
-          />
-        </div>
-        <div>
-          <label className="form-label">New Password</label>
-          <input
-            required
-            minLength={6}
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="input-field"
-          />
-        </div>
-        <div>
-          <label className="form-label">Confirm New Password</label>
-          <input
-            required
-            minLength={6}
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="input-field"
-          />
-        </div>
-
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-inset ring-red-200">
-            {error}
-          </p>
-        )}
-        {success && (
-          <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600 ring-1 ring-inset ring-emerald-200">
-            {success}
-          </p>
-        )}
-
-        <button type="submit" disabled={saving} className="btn-primary w-full">
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          Update Password
-        </button>
-      </form>
-    </div>
+    </>
   );
 }

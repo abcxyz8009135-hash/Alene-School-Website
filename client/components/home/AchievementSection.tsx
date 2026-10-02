@@ -1,6 +1,7 @@
 import Photo from "@/components/Photo";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
+import type { SiteContent } from "@/lib/content";
 import type { ProgramAchievement } from "@/lib/types";
 
 export interface AchievementSlot {
@@ -11,9 +12,10 @@ export interface AchievementSlot {
 interface AchievementSectionProps {
   image: string;
   slots: AchievementSlot[];
+  content: SiteContent;
 }
 
-export default function AchievementSection({ image, slots }: AchievementSectionProps) {
+export default function AchievementSection({ image, slots, content: c }: AchievementSectionProps) {
   const [featured, ...rest] = slots;
 
   return (
@@ -21,9 +23,9 @@ export default function AchievementSection({ image, slots }: AchievementSectionP
       <div className="container-page">
         <SectionHeading
           index="05"
-          eyebrow="Student achievements"
-          title={<span id="achievements-title">What our students achieve.</span>}
-          intro="Results earned through practice, teamwork and persistence — in competitions, in the classroom and in the community."
+          eyebrow={c.text("home.achievements.eyebrow")}
+          title={<span id="achievements-title">{c.text("home.achievements.title")}</span>}
+          intro={c.text("home.achievements.intro")}
         />
 
         <div className="mt-14 grid grid-cols-1 gap-px overflow-hidden border border-ink-200 bg-ink-200 lg:mt-16 lg:grid-cols-12">
