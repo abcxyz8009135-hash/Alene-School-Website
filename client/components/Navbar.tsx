@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, LogIn, Mail, Menu, Phone, X } from "lucide-react";
 import Logo from "./Logo";
-import AuthModal from "./AuthModal";
 import type { SiteNavigation } from "@/lib/content";
 import type { SiteSettings } from "@/lib/settings";
+import { PORTAL_URL } from "@/lib/constants";
 
 interface NavbarProps {
   settings: SiteSettings;
@@ -23,7 +23,6 @@ export default function Navbar({ settings, nav }: NavbarProps) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
 
   const drawerRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -129,14 +128,13 @@ export default function Navbar({ settings, nav }: NavbarProps) {
           </ul>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <button
-              type="button"
-              onClick={() => setAuthOpen(true)}
+            <a
+              href={PORTAL_URL}
               className="hidden items-center gap-1.5 rounded px-3 py-2 text-sm font-semibold text-white/80 transition-colors hover:text-white focus-visible:ring-white focus-visible:ring-offset-crimson-600 xl:inline-flex"
             >
               <LogIn className="h-4 w-4" aria-hidden="true" />
               {nav.portalLabel}
-            </button>
+            </a>
             <Link
               href={nav.exam.href}
               aria-current={examActive ? "page" : undefined}
@@ -237,17 +235,10 @@ export default function Navbar({ settings, nav }: NavbarProps) {
                 {nav.exam.label}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setAuthOpen(true);
-                }}
-                className="btn-secondary w-full"
-              >
+              <a href={PORTAL_URL} className="btn-secondary w-full">
                 <LogIn className="h-4 w-4" aria-hidden="true" />
                 {nav.portalLabel}
-              </button>
+              </a>
               <div className="flex flex-col gap-1.5 pt-2 text-sm text-ink-500">
                 {settings.contactPhone && (
                   <a href={`tel:${settings.contactPhone.replace(/\s/g, "")}`} className="inline-flex items-center gap-2 hover:text-brand-700">
@@ -266,8 +257,6 @@ export default function Navbar({ settings, nav }: NavbarProps) {
           </div>
         </div>
       )}
-
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );
 }

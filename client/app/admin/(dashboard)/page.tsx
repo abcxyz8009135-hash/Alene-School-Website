@@ -10,14 +10,13 @@ import {
   Home,
   Newspaper,
   Plus,
-  UserPlus,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import { AdminPageHeader, EmptyState, ErrorState, StatusBadge } from "@/components/admin/ui";
 import { adminFetch, getAdminUser } from "@/lib/adminApi";
 import { formatAdminDate } from "@/lib/admin/format";
-import type { AccessRequest, AdminProgram } from "@/lib/admin/types";
+import type { AdminProgram } from "@/lib/admin/types";
 import type { NewsArticle } from "@/lib/types";
 
 interface DashboardStats {
@@ -31,7 +30,6 @@ interface DashboardStats {
 interface Overview {
   stats: DashboardStats;
   programCount: number;
-  pending: AccessRequest[];
   recentNews: NewsArticle[];
 }
 
@@ -43,16 +41,14 @@ export default function AdminDashboardPage() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [stats, programs, requests, news] = await Promise.all([
+      const [stats, programs, news] = await Promise.all([
         adminFetch("/admin/stats"),
         adminFetch("/admin/programs"),
-        adminFetch("/admin/access-requests"),
         adminFetch("/admin/news"),
       ]);
       setData({
         stats: stats.stats,
         programCount: (programs.programs as AdminProgram[]).length,
-        pending: (requests.requests as AccessRequest[]).filter((r) => r.status === "PENDING"),
         recentNews: [...(news.articles as NewsArticle[])]
           .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
           .slice(0, 5),
@@ -81,12 +77,6 @@ export default function AdminDashboardPage() {
       icon: ClipboardList,
       note: passRate !== null ? `${s!.passCount} passed (${passRate}%)` : undefined,
     },
-    {
-      label: "Pending access requests",
-      value: data?.pending.length,
-      href: "/admin/access-requests",
-      icon: UserPlus,
-    },
     { label: "Registered users", value: s?.usersCount, icon: Users, note: "Admins, staff and students" },
   ];
 
@@ -106,7 +96,7 @@ export default function AdminDashboardPage() {
       {error && <ErrorState message={error} onRetry={load} />}
 
       {/* Overview */}
-      <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((card) => {
           const body = (
             <>
@@ -122,9 +112,7 @@ export default function AdminDashboardPage() {
             <Link
               key={card.label}
               href={card.href}
-              className={`card block p-4 transition hover:border-brand-300 ${
-                card.href === "/admin/access-requests" && (card.value ?? 0) > 0 ? "border-crimson-300" : ""
-              }`}
+              className="card block p-4 transition hover:border-brand-300"
             >
               {body}
             </Link>
@@ -205,38 +193,6 @@ export default function AdminDashboardPage() {
                 </li>
               ))}
             </ul>
-          </section>
-
-          {/* Pending requests */}
-          <section aria-labelledby="pending-requests" className="card">
-            <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-              <h2 id="pending-requests" className="text-base font-semibold text-ink-900">
-                Waiting for review
-              </h2>
-              {data && data.pending.length > 0 && <StatusBadge tone="warning">{data.pending.length}</StatusBadge>}
-            </div>
-            {!data ? (
-              <p className="px-5 py-6 text-center text-sm text-ink-400">Loading…</p>
-            ) : data.pending.length === 0 ? (
-              <p className="px-5 py-6 text-sm text-ink-500">No pending access requests.</p>
-            ) : (
-              <ul className="divide-y divide-ink-100">
-                {data.pending.slice(0, 4).map((r) => (
-                  <li key={r.id} className="px-5 py-3">
-                    <p className="text-sm font-medium text-ink-900">{r.fullName}</p>
-                    <p className="text-xs text-ink-500">
-                      {r.role === "teacher" ? "Teacher / Principal" : "Student"} · {formatAdminDate(r.createdAt)}
-                    </p>
-                  </li>
-                ))}
-                <li className="px-5 py-3">
-                  <Link href="/admin/access-requests" className="link-arrow text-xs">
-                    Review requests
-                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </Link>
-                </li>
-              </ul>
-            )}
           </section>
         </div>
       </div>

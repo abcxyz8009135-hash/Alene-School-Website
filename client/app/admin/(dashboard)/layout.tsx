@@ -9,7 +9,6 @@ import { API_BASE_URL } from "@/lib/constants";
 import { ADMIN_NAV, isNavItemActive } from "@/lib/admin/nav";
 import {
   AdminUser,
-  adminFetch,
   clearAdminSession,
   getAdminToken,
   getAdminUser,
@@ -22,7 +21,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const [checking, setChecking] = useState(true);
   const [user, setUser] = useState<AdminUser | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState(0);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -64,18 +62,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       cancelled = true;
     };
   }, [router]);
-
-  // Pending access-request count for the sidebar badge; refreshed on navigation.
-  useEffect(() => {
-    if (checking) return;
-    adminFetch("/admin/access-requests")
-      .then((data) =>
-        setPendingRequests(
-          (data?.requests ?? []).filter((r: { status: string }) => r.status === "PENDING").length
-        )
-      )
-      .catch(() => undefined);
-  }, [checking, pathname]);
 
   // Close the drawer on navigation.
   useEffect(() => {
@@ -130,7 +116,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     );
   }
 
-  const badges = { "/admin/access-requests": pendingRequests };
   const currentItem = ADMIN_NAV.flatMap((g) => g.items).find((item) => isNavItemActive(pathname, item));
 
   return (
@@ -139,7 +124,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         {/* Desktop sidebar */}
         <aside className="hidden w-64 shrink-0 border-r border-ink-200 bg-white lg:block">
           <div className="sticky top-[68px] h-[calc(100vh-68px)]">
-            <AdminSidebar user={user} onLogout={handleLogout} badges={badges} />
+            <AdminSidebar user={user} onLogout={handleLogout} />
           </div>
         </aside>
 
@@ -158,11 +143,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           </button>
           {currentItem && (
             <span className="truncate border-l border-ink-200 pl-3 text-sm text-ink-500">{currentItem.label}</span>
-          )}
-          {pendingRequests > 0 && (
-            <span className="ml-auto rounded-full bg-crimson-600 px-2 py-0.5 text-[10px] font-bold text-white">
-              {pendingRequests} pending
-            </span>
           )}
         </div>
 
@@ -185,7 +165,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
               >
                 <X className="h-5 w-5" />
               </button>
-              <AdminSidebar user={user} onLogout={handleLogout} onNavigate={() => setDrawerOpen(false)} badges={badges} />
+              <AdminSidebar user={user} onLogout={handleLogout} onNavigate={() => setDrawerOpen(false)} />
             </div>
           </div>
         )}

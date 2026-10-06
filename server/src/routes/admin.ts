@@ -28,11 +28,6 @@ import {
   updateProgram,
 } from "../controllers/adminProgramContentController.js";
 import { updateSettings } from "../controllers/adminSettingsController.js";
-import {
-  approveAccessRequest,
-  listAccessRequests,
-  rejectAccessRequest,
-} from "../controllers/adminAccessRequestController.js";
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
@@ -66,9 +61,5 @@ router.put("/programs/:id", updateProgram);
 router.delete("/programs/:id", deleteProgram);
 
 router.put("/settings", updateSettings);
-
-router.get("/access-requests", listAccessRequests);
-router.post("/access-requests/:id/approve", approveAccessRequest);
-router.post("/access-requests/:id/reject", rejectAccessRequest);
 
 export default router;

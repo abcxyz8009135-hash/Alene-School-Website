@@ -11,6 +11,10 @@ export const SITE_URL =
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
 
+/** The school management system (separate app) that the "Portal" link opens. */
+export const PORTAL_URL =
+  process.env.NEXT_PUBLIC_PORTAL_URL || "https://scripts-and-fullstack-apps-6az8.vercel.app";
+
 export const CONTACT_INFO = {
   address: SCHOOL_LOCATION,
   phone: "+251971190170",

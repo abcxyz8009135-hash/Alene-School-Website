@@ -55,29 +55,6 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-const requestAccessSchema = z.object({
-  fullName: z.string().min(2, "Full name is required."),
-  email: z.string().email("A valid email is required."),
-  role: z.enum(["student", "teacher"]),
-});
-
-export async function requestAccess(req: Request, res: Response) {
-  const parsed = requestAccessSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ message: parsed.error.issues[0]?.message ?? "Invalid input." });
-  }
-
-  try {
-    await prisma.accessRequest.create({ data: parsed.data });
-    return res.status(201).json({
-      message: "Your request has been submitted to school administration for review.",
-    });
-  } catch (error) {
-    console.error("Error creating access request:", error);
-    return res.status(500).json({ message: "Internal server error." });
-  }
-}
-
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
   newPassword: z.string().min(6, "New password must be at least 6 characters."),

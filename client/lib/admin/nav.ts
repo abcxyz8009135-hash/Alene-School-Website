@@ -10,7 +10,6 @@ import {
   Newspaper,
   Search,
   Settings,
-  UserPlus,
   type LucideIcon,
 } from "lucide-react";
 
@@ -56,10 +55,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: "SEO", href: "/admin/content/seo", icon: Search },
       { label: "Site settings", href: "/admin/content/settings", icon: Settings },
     ],
-  },
-  {
-    label: "Communication",
-    items: [{ label: "Access Requests", href: "/admin/access-requests", icon: UserPlus }],
   },
   {
     label: "System",

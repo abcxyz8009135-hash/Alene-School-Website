@@ -13,12 +13,3 @@ export interface AdminProgram {
   establishedYear: number;
   updatedAt?: string;
 }
-
-export interface AccessRequest {
-  id: string;
-  fullName: string;
-  email: string;
-  role: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  createdAt: string;
-}

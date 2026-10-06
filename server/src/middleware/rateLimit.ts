@@ -11,7 +11,7 @@ export const loginRateLimit = rateLimit({
 });
 
 // Looser limit for lower-risk endpoints that are still worth protecting
-// from spam/abuse (access requests, password changes).
+// from spam/abuse (e.g. password changes).
 export const formRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
   limit: 20,

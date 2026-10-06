@@ -1,16 +1,14 @@
 import { Router } from "express";
-import { changePassword, login, me, requestAccess } from "../controllers/authController.js";
+import { changePassword, login, me } from "../controllers/authController.js";
 import { requireAuth } from "../middleware/auth.js";
 import { formRateLimit, loginRateLimit } from "../middleware/rateLimit.js";
 
 const router = Router();
 
-// Public self-registration is intentionally not exposed — all student/teacher
-// accounts must go through the request-access -> admin approval flow so an
-// admin controls who gets portal access. See adminAccessRequestController.
+// Public self-registration is intentionally not exposed. Student/teacher
+// portal accounts live in the separate school management system.
 
 router.post("/login", loginRateLimit, login);
-router.post("/request-access", formRateLimit, requestAccess);
 router.post("/change-password", requireAuth, formRateLimit, changePassword);
 router.get("/me", requireAuth, me);
 
